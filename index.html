@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Aggregate end-of-programme feedback from Shamzbridge Data Analytics Cohort 2.">
+  <title>Shamzbridge · Cohort 2 Feedback</title>
+  <style>
+    :root {
+      --ink: #14332f;
+      --muted: #64746e;
+      --paper: #f4f6ef;
+      --white: #fffefa;
+      --line: #e2e8dd;
+      --green: #24574d;
+      --green-dark: #143b35;
+      --lime: #d3f27a;
+      --coral: #ff886e;
+      --blue: #a9d8e6;
+      --gold: #f5ca67;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 85px; }
+    body { margin: 0; min-height: 100vh; background: var(--paper); }
+    a { color: inherit; }
+    .topbar {
+      position: sticky; z-index: 3; top: 0; display: flex; justify-content: space-between;
+      align-items: center; gap: 18px; padding: 14px max(22px, calc((100vw - 1120px) / 2));
+      border-bottom: 1px solid rgba(20,51,47,.09); background: rgba(244,246,239,.94);
+      backdrop-filter: blur(12px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 12px; color: var(--green-dark); background: var(--lime); font-size: 15px; font-weight: 900; }
+    .brand-title { font-size: 12px; font-weight: 800; }
+    .brand-sub { margin-top: 2px; color: var(--muted); font-size: 9px; letter-spacing: .11em; text-transform: uppercase; }
+    .nav { display: flex; flex-wrap: wrap; gap: 5px; }
+    .nav a { padding: 8px 10px; border-radius: 9px; text-decoration: none; color: var(--muted); font-size: 10px; font-weight: 650; transition: background .2s, color .2s; }
+    .nav a:hover { color: var(--green-dark); background: #e4ecd9; }
+    main { width: min(1120px, 100%); margin: 0 auto; padding: 26px 24px 60px; }
+    section { margin: 0 0 26px; }
+    .hero {
+      position: relative; overflow: hidden; min-height: 410px; padding: clamp(30px, 7vw, 70px);
+      border-radius: 27px; color: #f8f8ef; background: var(--green-dark);
+    }
+    .hero::before, .hero::after { content: ""; position: absolute; border: 1px solid rgba(211,242,122,.24); border-radius: 50%; pointer-events: none; }
+    .hero::before { width: 410px; height: 410px; right: -120px; top: -122px; }
+    .hero::after { width: 275px; height: 275px; right: -50px; top: -54px; }
+    .eyebrow { color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .hero .eyebrow { color: var(--lime); }
+    h1 { position: relative; z-index: 1; max-width: 720px; margin: 34px 0 14px; font-size: clamp(42px, 7vw, 76px); line-height: .96; letter-spacing: -.075em; }
+    h1 span { color: var(--lime); }
+    .hero-copy { position: relative; z-index: 1; max-width: 600px; margin: 0; color: #c4d2c8; font-size: 14px; line-height: 1.7; }
+    .hero-foot { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin-top: 47px; color: #bacbbf; font-size: 11px; line-height: 1.7; }
+    .hero-foot strong { display: block; color: white; font-size: 13px; }
+    .privacy-chip { padding: 9px 11px; border: 1px solid rgba(255,255,255,.2); border-radius: 10px; }
+    .privacy-chip::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--lime); }
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin: 38px 0 18px; }
+    h2 { margin: 8px 0 0; font-size: clamp(26px, 4vw, 41px); line-height: 1; letter-spacing: -.06em; }
+    .section-note { max-width: 430px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 11px; }
+    .metric { position: relative; overflow: hidden; min-height: 128px; padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); transition: transform .2s, box-shadow .2s; }
+    .metric:hover, .card:hover, .rating:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(20,59,53,.09); }
+    .metric::after { content: ""; position: absolute; right: -20px; bottom: -28px; width: 82px; height: 82px; border: 1px solid #e1e9d8; border-radius: 50%; }
+    .metric b { display: block; margin: 9px 0 5px; font-size: 32px; line-height: 1; letter-spacing: -.06em; }
+    .metric span { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .question { margin: 0 0 13px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); }
+    .question-label { margin-bottom: 5px; color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .question p { margin: 0; font-size: 11px; font-weight: 700; line-height: 1.55; }
+    .question small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .card { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); transition: transform .2s, box-shadow .2s; }
+    .card h3 { margin: 0 0 11px; font-size: 12px; line-height: 1.5; }
+    .card h3 small { display: block; margin-bottom: 4px; color: var(--green); font-size: 9px; letter-spacing: .09em; text-transform: uppercase; }
+    .option-list { display: grid; gap: 6px; }
+    .option { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; align-items: center; padding: 8px 9px; border-radius: 9px; background: #f2f4ee; }
+    .option strong { display: block; font-size: 10px; line-height: 1.35; }
+    .option small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+    .votes { min-width: 64px; color: var(--green); font-size: 10px; font-weight: 800; text-align: right; white-space: nowrap; }
+    .votes small { color: var(--muted); font-size: 8px; font-weight: 500; }
+    .rating-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .rating { display: grid; grid-template-columns: 61px minmax(0,1fr); gap: 11px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); transition: transform .2s, box-shadow .2s; }
+    .ring { width: 60px; height: 60px; }
+    .ring-track { fill: none; stroke: #e7ece3; stroke-width: 5; }
+    .ring-value { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+    .ring-text { fill: var(--ink); font-size: 12px; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
+    .rating-title { margin-bottom: 5px; font-size: 10px; font-weight: 750; line-height: 1.45; }
+    .rating-avg { margin-bottom: 7px; color: var(--green); font-size: 9px; font-weight: 750; }
+    .rating-counts { display: flex; flex-wrap: wrap; gap: 4px; }
+    .rating-counts span { padding: 4px 5px; border-radius: 5px; color: #53635c; background: #f1f3ed; font-size: 8px; }
+    .rating-counts b { color: var(--ink); }
+    .skill-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .skill { padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); transition: transform .2s, box-shadow .2s; }
+    .skill-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .skill-head strong { font-size: 11px; }
+    .skill-head b { flex: none; color: var(--green); font-size: 10px; }
+    .skill-desc { margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.45; }
+    .dots { display: grid; grid-template-columns: repeat(13, 8px); gap: 5px; margin: 12px 0 10px; }
+    .dots i { width: 7px; height: 7px; border-radius: 50%; background: #e6e9e1; }
+    .dots .much { background: var(--green); }
+    .dots .slight { background: #8dbbaa; }
+    .dots .same { background: var(--gold); }
+    .dots .lower { background: var(--coral); }
+    .dots .much-lower { background: #bd6558; }
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chips span { padding: 4px 5px; border-radius: 5px; color: var(--muted); background: #f1f3ed; font-size: 8px; }
+    .chips b { color: var(--ink); }
+    .readiness { display: grid; grid-template-columns: .8fr 1.2fr; gap: 12px; }
+    .readiness-total { display: flex; flex-direction: column; justify-content: center; min-height: 150px; padding: 22px; border-radius: 17px; color: white; background: var(--green); }
+    .readiness-total small { color: var(--lime); font-size: 9px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .readiness-total b { margin: 14px 0 7px; font-size: 51px; line-height: .9; letter-spacing: -.08em; }
+    .readiness-total span { color: #d4dfd6; font-size: 10px; line-height: 1.5; }
+    .themes { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
+    .theme { padding: 17px; border-radius: 15px; background: #e9efdf; }
+    .theme:nth-child(2) { background: #e4eff0; }
+    .theme:nth-child(3) { background: #fff0e8; }
+    .theme:nth-child(4) { background: #f0eddd; }
+    .theme h3 { margin: 0 0 7px; font-size: 12px; }
+    .theme p { margin: 0; color: #53635c; font-size: 10px; line-height: 1.65; }
+    .theme-count { display: inline-block; margin-bottom: 10px; padding: 5px 7px; border-radius: 7px; background: rgba(255,255,255,.65); color: var(--green); font-size: 9px; font-weight: 750; }
+    .closing { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: center; padding: 25px; border-radius: 19px; color: white; background: var(--green-dark); }
+    .closing h2 { max-width: 550px; margin: 10px 0; }
+    .closing p { max-width: 580px; margin: 0; color: #c9d8cc; font-size: 11px; line-height: 1.7; }
+    .orbit { justify-self: center; display: grid; place-items: center; width: 138px; height: 138px; border: 1px solid rgba(211,242,122,.42); border-radius: 50%; box-shadow: 0 0 0 19px rgba(211,242,122,.05), 0 0 0 40px rgba(211,242,122,.035); }
+    .orbit span { display: grid; place-items: center; width: 70px; height: 70px; border-radius: 24px; color: var(--green-dark); background: var(--lime); font-size: 18px; font-weight: 900; }
+    footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.6; }
+    @media (max-width: 760px) {
+      .topbar { align-items: flex-start; flex-direction: column; padding: 12px 18px 9px; }
+      .nav { overflow-x: auto; flex-wrap: nowrap; width: 100%; padding-bottom: 3px; }
+      .nav a { flex: none; }
+      main { padding: 17px 15px 40px; }
+      .hero { min-height: 410px; border-radius: 20px; }
+      .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+      .metric { min-height: 118px; padding: 13px; }
+      .metric b { font-size: 29px; }
+      .grid-2, .rating-grid, .skill-grid, .themes, .closing, .readiness { grid-template-columns: 1fr; }
+      .hero-foot { align-items: flex-start; flex-direction: column; margin-top: 33px; }
+      .privacy-chip { font-size: 10px; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      .orbit { margin: 10px 0 18px; }
+    }
+    @media print {
+      .topbar { position: static; }
+      .nav { display: none; }
+      main { padding: 8mm; }
+      section { break-inside: avoid; }
+      .hero, .readiness-total, .closing { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .metric, .card, .rating, .skill { break-inside: avoid; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Shamzbridge Cohort 2 feedback report">
+      <span class="brand-mark" aria-hidden="true">sb</span>
+      <span><span class="brand-title">Shamzbridge</span><span class="brand-sub">Cohort 2 · Data Analytics</span></span>
+    </a>
+    <nav class="nav" aria-label="Report sections">
+      <a href="#overview">Overview</a><a href="#experience">Experience</a><a href="#delivery">Delivery</a>
+      <a href="#habits">Learner habits</a><a href="#skills">Skills</a><a href="#readiness">Readiness</a>
+      <a href="#support">Support</a><a href="#themes">Written feedback</a>
+    </nav>
+  </header>
+  <main id="top">
+    <section class="hero" id="overview">
+      <div class="eyebrow">Student voice · End-of-programme feedback</div>
+      <h1>Learning that moves <span>people forward.</span></h1>
+      <p class="hero-copy">An aggregate readout of the Shamzbridge Data Analytics second cohort—what worked, what grew, and where the next cohort can go further.</p>
+      <div class="hero-foot"><div><strong>Shamzbridge · Cohort 2</strong>Feedback collected 27–30 October 2026<br>Based on 26 submitted responses</div><div class="privacy-chip">Published as aggregate results only · no individual responses</div></div>
+    </section>
+
+    <section aria-labelledby="snapshot-title">
+      <div class="section-head"><div><div class="eyebrow">The signal</div><h2 id="snapshot-title">Strong experience. Clear next step.</h2></div><p class="section-note">The cohort valued practical learning and supportive people. Students also signalled where more practice and room in the schedule would help.</p></div>
+      <div class="metrics">
+        <article class="metric"><div class="eyebrow">Responses</div><b>26</b><span>End-of-programme forms submitted</span></article>
+        <article class="metric"><div class="eyebrow">Experience</div><b>24/26</b><span>rated it Excellent or Very good</span></article>
+        <article class="metric"><div class="eyebrow">Expectations</div><b>22/26</b><span>said the programme exceeded expectations</span></article>
+        <article class="metric"><div class="eyebrow">Power BI</div><b>23/26</b><span>reported higher ability than at programme start</span></article>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="section-head"><div><div class="eyebrow">01 · Overall experience</div><h2>Positive ratings across the cohort.</h2></div><p class="section-note">Each option shows the vote count and share of 26 submitted answers. Zero-vote options are retained for context.</p></div>
+      <article class="question"><div class="question-label">Question 1 · Multiple choice</div><p>Overall, how would you rate your experience with the programme?</p><small>Excellent — Outstanding quality, exceeded all benchmarks · Very good — High standard, delivered exceptional value · Good — Satisfactory and solid learning experience · Fair — Adequate but notable areas need improvement · Poor — Did not meet core expectations or standards</small></article>
+      <div class="grid-2">
+        <article class="card"><h3><small>Question 1 · 26 responses</small>Overall programme experience</h3><div class="option-list">
+          <div class="option"><div><strong>Excellent</strong><small>Outstanding quality, exceeded all benchmarks</small></div><div class="votes">19/26<small>73%</small></div></div>
+          <div class="option"><div><strong>Very good</strong><small>High standard, delivered exceptional value</small></div><div class="votes">5/26<small>19%</small></div></div>
+          <div class="option"><div><strong>Good</strong><small>Satisfactory and solid learning experience</small></div><div class="votes">2/26<small>8%</small></div></div>
+          <div class="option"><div><strong>Fair</strong><small>Adequate but notable areas need improvement</small></div><div class="votes">0/26<small>0%</small></div></div>
+          <div class="option"><div><strong>Poor</strong><small>Did not meet core expectations or standards</small></div><div class="votes">0/26<small>0%</small></div></div>
+        </div></article>
+        <article class="card"><h3><small>Question 2 · 26 responses</small>To what extent did the programme meet your expectations?</h3><div class="option-list">
+          <div class="option"><div><strong>Exceeded my expectations</strong><small>Delivered significantly more than anticipated</small></div><div class="votes">22/26<small>85%</small></div></div>
+          <div class="option"><div><strong>Met my expectations</strong><small>Covered what was promised and intended</small></div><div class="votes">4/26<small>15%</small></div></div>
+          <div class="option"><div><strong>Partially met my expectations</strong><small>Met some requirements, fell short in others</small></div><div class="votes">0/26<small>0%</small></div></div>
+          <div class="option"><div><strong>Fell below my expectations</strong><small>Significantly missed key expectations</small></div><div class="votes">0/26<small>0%</small></div></div>
+        </div></article>
+        <article class="card"><h3><small>Question 3 · 26 responses</small>How would you rate the overall organization and coordination of the programme?</h3><div class="option-list">
+          <div class="option"><div><strong>Excellent</strong></div><div class="votes">16/26<small>62%</small></div></div>
+          <div class="option"><div><strong>Very good</strong></div><div class="votes">8/26<small>31%</small></div></div>
+          <div class="option"><div><strong>Good</strong></div><div class="votes">2/26<small>8%</small></div></div>
+          <div class="option"><div><strong>Fair</strong></div><div class="votes">0/26<small>0%</small></div></div>
+          <div class="option"><div><strong>Poor</strong></div><div class="votes">0/26<small>0%</small></div></div>
+        </div></article>
+      </div>
+    </section>
+
+    <section id="delivery">
+      <div class="section-head"><div><div class="eyebrow">02 · Programme team & training delivery</div><h2>Practical work leads. Pace can improve.</h2></div><p class="section-note">Ring value is the average rating out of five. Each card includes the exact question, vote count and distribution across the form scale.</p></div>
+      <article class="question"><div class="question-label">Questions 5–9 · Scale 1–5</div><p>1 = Strongly disagree · 2 = Disagree · 3 = Neither agree nor disagree · 4 = Agree · 5 = Strongly agree</p></article>
+      <div class="rating-grid" id="deliveryRatings"></div>
+    </section>
+
+    <section id="habits">
+      <div class="section-head"><div><div class="eyebrow">03 · Student self-assessment & commitment</div><h2>Commitment was strong. Time was tighter.</h2></div><p class="section-note">An average of 4.0 means the mean of the recorded 1–5 responses. On the outside-class-time question, 26 votes contributed to the score.</p></div>
+      <article class="question"><div class="question-label">Questions 11–14 · Scale 1–5</div><p>1 = Strongly disagree · 2 = Disagree · 3 = Neither agree nor disagree · 4 = Agree · 5 = Strongly agree</p></article>
+      <div class="rating-grid" id="habitRatings"></div>
+    </section>
+
+    <section id="skills">
+      <div class="section-head"><div><div class="eyebrow">04 · Skills gained</div><h2>Self-reported growth across all six skills.</h2></div><p class="section-note">Each dot represents one response. The vote chips show the number selecting each option; direction is self-assessed, not a pre/post test.</p></div>
+      <article class="question"><div class="question-label">Question 16 · Multiple-choice grid</div><p>How would you rate your current ability in each area compared with when you started the programme?</p><small>Form options: Much Lower · Slightly Lower · About Same · Slightly Higher · Much Higher</small></article>
+      <div class="skill-grid" id="skillGrid"></div>
+    </section>
+
+    <section id="readiness">
+      <div class="section-head"><div><div class="eyebrow">05 · Skills gained & readiness</div><h2>Most feel prepared to apply their skills.</h2></div><p class="section-note">The chart uses the full set of response options, including those with no votes.</p></div>
+      <article class="question"><div class="question-label">Question 17 · Multiple choice</div><p>How prepared do you feel to use your data analytics skills to solve a real-world business problem independently?</p><small>Very prepared — Confident to tackle end-to-end industry briefs independently · Somewhat prepared — Can handle tasks with standard documentation and mentorship · Neither prepared nor unprepared — Neutral, requires structured environment · Slightly unprepared — Feel hesitation on complex business projects · Not prepared at all — Require comprehensive additional training</small></article>
+      <div class="readiness"><article class="readiness-total"><small>Prepared or somewhat prepared</small><b>23/26</b><span>88% of responses</span></article><article class="card"><div class="option-list">
+        <div class="option"><div><strong>Very prepared</strong><small>Confident to tackle end-to-end industry briefs independently</small></div><div class="votes">14/26<small>54%</small></div></div>
+        <div class="option"><div><strong>Somewhat prepared</strong><small>Can handle tasks with standard documentation and mentorship</small></div><div class="votes">9/26<small>35%</small></div></div>
+        <div class="option"><div><strong>Neither prepared nor unprepared</strong><small>Neutral, requires structured environment</small></div><div class="votes">0/26<small>0%</small></div></div>
+        <div class="option"><div><strong>Slightly unprepared</strong><small>Feel hesitation on complex business projects</small></div><div class="votes">3/26<small>12%</small></div></div>
+        <div class="option"><div><strong>Not prepared at all</strong><small>Require comprehensive additional training</small></div><div class="votes">0/26<small>0%</small></div></div>
+      </div></article></div>
+    </section>
+
+    <section id="support">
+      <div class="section-head"><div><div class="eyebrow">06 · Practice & support needs</div><h2>SQL is the clearest support signal.</h2></div><p class="section-note">One response per learner. Vote totals add up to 26; the complete option list is shown.</p></div>
+      <article class="question"><div class="question-label">Question 18 · Single choice</div><p>Which area do you still need the most support or practice in?</p></article>
+      <div class="grid-2">
+        <article class="card"><h3>Support area selections · 26 responses</h3><div class="option-list">
+          <div class="option"><strong>Excel</strong><div class="votes">0/26<small>0%</small></div></div>
+          <div class="option"><strong>SQL</strong><div class="votes">10/26<small>38%</small></div></div>
+          <div class="option"><strong>Power BI</strong><div class="votes">4/26<small>15%</small></div></div>
+          <div class="option"><strong>Analytical thinking and problem-solving</strong><div class="votes">1/26<small>4%</small></div></div>
+          <div class="option"><strong>Data visualisation and storytelling</strong><div class="votes">0/26<small>0%</small></div></div>
+          <div class="option"><strong>Presenting and communicating findings</strong><div class="votes">6/26<small>23%</small></div></div>
+          <div class="option"><strong>Portfolio development and real-world projects</strong><div class="votes">1/26<small>4%</small></div></div>
+          <div class="option"><strong>Job readiness and professional development</strong><div class="votes">3/26<small>12%</small></div></div>
+          <div class="option"><strong>Other</strong><div class="votes">1/26<small>4%</small></div></div>
+        </div></article>
+        <article class="card"><h3>What to strengthen</h3><p class="section-note">Prioritise additional SQL practice, then coached opportunities to present and explain findings. Power BI was another recurring area for support.</p></article>
+      </div>
+    </section>
+
+    <section id="themes">
+      <div class="section-head"><div><div class="eyebrow">07 · Written feedback · aggregate themes</div><h2>Keep the human touch. Make room for practice.</h2></div><p class="section-note">Themes below summarise written responses; no individual comments or student-level cards are published.</p></div>
+      <div class="question"><div class="question-label">Question 4 · 26 meaningful responses</div><p>What was the most valuable aspect of the programme for you, and why?</p><small>Most-mentioned themes: practical learning and real projects; coaches and facilitators; professional development, guest leaders and mentorship; presentations and peer learning.</small></div>
+      <div class="question"><div class="question-label">Question 10 · 10 meaningful responses · optional</div><p>What should the programme team improve in its teaching, support, communication, scheduling, or general coordination?</p></div>
+      <div class="question"><div class="question-label">Question 15 · 25 meaningful responses</div><p>What is one thing you could have done differently to get more value from this programme?</p><small>Recurring theme: dedicate more time to revision, independent practice, personal projects, and asking questions.</small></div>
+      <div class="question"><div class="question-label">Question 19 · 26 meaningful responses</div><p>What was the biggest challenge you faced during the programme, and how did it affect your learning?</p></div>
+      <div class="question"><div class="question-label">Question 20 · 21 meaningful responses</div><p>If you could change one thing about the programme to make it more effective for future students, what would it be?</p></div>
+      <div class="question"><div class="question-label">Question 21 · 25 meaningful responses</div><p>What would you say are the programme’s greatest strengths, and what are its most important areas for improvement?</p></div>
+      <div class="themes">
+        <article class="theme"><span class="theme-count">Strengths to preserve</span><h3>People, projects and exposure</h3><p>Written feedback repeatedly highlights committed coaches, practical project work, professional development, guest leaders and mentorship.</p></article>
+        <article class="theme"><span class="theme-count">Learning design</span><h3>More time to practise</h3><p>Students want more hands-on time between tools, space to revise and practise independently, and deadlines that are easier to balance.</p></article>
+        <article class="theme"><span class="theme-count">Support priorities</span><h3>Build skills and confidence</h3><p>Additional SQL and Power BI practice, clearer technical support, and more chances to present insights are recurring improvement themes.</p></article>
+        <article class="theme"><span class="theme-count">Learning environment</span><h3>Make practice more accessible</h3><p>Some feedback calls for improved access to a suitable place, equipment, connectivity and time to continue learning outside class.</p></article>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div><div class="eyebrow" style="color:var(--lime)">The takeaway</div><h2>Keep what works. Give practice more room.</h2><p>Students rated the programme experience highly and reported skill gains. Preserve the practical, people-centred strengths while creating more supported time for technical practice, communicating findings and a manageable learning pace.</p></div>
+      <div class="orbit" aria-hidden="true"><span>sb</span></div>
+    </section>
+    <footer><span>Source: Shamzbridge Cohort 2 end-of-programme feedback · 26 responses</span><span>Aggregate report · No individual feedback or identifiers included</span></footer>
+  </main>
+  <script>
+    const responses = 26;
+    const ratingScale = [
+      ["1", "Strongly disagree"], ["2", "Disagree"], ["3", "Neither agree nor disagree"],
+      ["4", "Agree"], ["5", "Strongly agree"]
+    ];
+    const delivery = [
+      ["5", "Concepts were explained clearly and in a way I could understand.", [0,1,0,15,10]],
+      ["6", "The practical exercises and assignments helped me apply what I learned.", [1,0,0,11,14]],
+      ["7", "I received adequate guidance and support when I encountered difficulties.", [2,0,0,12,12]],
+      ["8", "The feedback I received on my work helped me identify areas for improvement.", [0,1,0,13,12]],
+      ["9", "The programme’s structure, pace and schedule supported my learning.", [0,1,2,15,8]]
+    ];
+    const habits = [
+      ["11", "I attended classes consistently and participated actively in learning activities.", [0,1,1,9,15]],
+      ["12", "I dedicated sufficient time outside class to practise, revise and complete assignments.", [1,0,5,12,8]],
+      ["13", "I took responsibility for resolving my learning difficulties by asking questions, researching or seeking help.", [1,0,3,13,9]],
+      ["14", "I collaborated effectively with my peers and contributed fairly to group activities and projects.", [1,0,1,10,14]]
+    ];
+    function renderRating(question) {
+      const [number, prompt, votes] = question;
+      const total = votes.reduce((sum, vote) => sum + vote, 0);
+      const mean = votes.reduce((sum, vote, index) => sum + vote * (index + 1), 0) / total;
+      const radius = 25;
+      const circumference = 2 * Math.PI * radius;
+      const dash = (mean / 5) * circumference;
+      const scaleVotes = ratingScale.map(([score, label], index) => `<span><b>${score}</b> ${label}: <b>${votes[index]}</b></span>`).join("");
+      return `<article class="rating"><svg class="ring" viewBox="0 0 60 60" role="img" aria-label="Average ${mean.toFixed(1)} out of 5 from ${total} responses"><circle class="ring-track" cx="30" cy="30" r="${radius}"/><circle class="ring-value" cx="30" cy="30" r="${radius}" stroke-dasharray="${dash} ${circumference}"/><text class="ring-text" x="30" y="31">${mean.toFixed(1)}</text></svg><div><div class="rating-title">${number}. ${prompt}</div><div class="rating-avg">Average ${mean.toFixed(1)} / 5 · ${total} votes</div><div class="rating-counts">${scaleVotes}</div></div></article>`;
+    }
+    document.getElementById("deliveryRatings").innerHTML = delivery.map(renderRating).join("");
+    document.getElementById("habitRatings").innerHTML = habits.map(renderRating).join("");
+    const skills = [
+      ["Excel for data analysis", "Formulas, pivot tables, data modeling & reporting", [0,0,0,8,18]],
+      ["SQL for data querying and analysis", "Joins, aggregations, window functions & CTEs", [0,1,3,13,9]],
+      ["Power BI for data modelling and visualisation", "Data modeling, DAX measures, interactive dashboards", [0,0,3,7,16]],
+      ["Breaking down business problems into analytical steps", "Structuring problems, metrics selection, project roadmaps", [0,0,3,14,9]],
+      ["Interpreting findings and communicating insights", "Executive storytelling, presentations & stakeholder comms", [0,0,2,9,15]],
+      ["Working independently on practical data tasks", "Self-driven debugging, workflow execution & deliverables", [0,0,4,9,13]]
+    ];
+    const skillLabels = ["Much lower", "Slightly lower", "About the same", "Slightly higher", "Much higher"];
+    const skillClasses = ["much-lower", "lower", "same", "slight", "much"];
+    document.getElementById("skillGrid").innerHTML = skills.map(([name, description, votes]) => {
+      const improved = votes[3] + votes[4];
+      const dots = votes.map((count, index) => Array.from({length: count}, () => `<i class="${skillClasses[index]}"></i>`).join("")).join("");
+      const chips = votes.map((count, index) => `<span><b>${count}</b> ${skillLabels[index]}</span>`).join("");
+      return `<article class="skill"><div class="skill-head"><strong>${name}</strong><b>${improved}/${responses} higher</b></div><div class="skill-desc">${description}</div><div class="dots" role="img" aria-label="${improved} of ${responses} reported higher ability">${dots}</div><div class="chips">${chips}</div></article>`;
+    }).join("");
+  </script>
+</body>
+</html>
