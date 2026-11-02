@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Aggregate end-of-programme feedback from Shamzbridge Data Analytics Cohort 2.">
-  <title>Shamzbridge · Cohort 2 Feedback</title>
+  <meta name="description" content="An interactive, aggregate feedback report for Shamzbridge Data Analytics Cohort 2.">
+  <title>Shamzbridge · Data Analytics Cohort 2 Feedback</title>
   <style>
     :root {
       --ink: #14332f;
@@ -13,12 +13,15 @@
       --paper: #f4f6ef;
       --white: #fffefa;
       --line: #e2e8dd;
-      --green: #24574d;
-      --green-dark: #143b35;
-      --lime: #d3f27a;
+      --green: #f36621;
+      --dark: #143b35;
+      --lime: #ffe0ca;
+      --mint: #85b7a3;
       --coral: #ff886e;
       --blue: #a9d8e6;
       --gold: #f5ca67;
+      --lavender: #d9d9f0;
+      --shadow: 0 16px 40px rgba(20,59,53,.08);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       background: var(--paper);
@@ -26,297 +29,389 @@
       text-rendering: optimizeLegibility;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; scroll-padding-top: 85px; }
+    html { scroll-behavior: smooth; }
     body { margin: 0; min-height: 100vh; background: var(--paper); }
-    a { color: inherit; }
+    button { font: inherit; color: inherit; }
+    .app { display: grid; grid-template-columns: 252px minmax(0,1fr); min-height: 100vh; transition: grid-template-columns .24s ease; }
+    .sidebar {
+      position: sticky; top: 0; display: flex; flex-direction: column; gap: 20px;
+      height: 100vh; padding: 25px 16px 18px; overflow-y: auto;
+      color: #f4f6ed; background: var(--dark);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+    .brand-mark { display: block; width: 38px; height: 38px; flex: none; padding: 3px; border-radius: 11px; background: white; object-fit: contain; }
+    .brand-name { display: block; font-size: 14px; font-weight: 800; }
+    .brand-sub { display: block; margin-top: 3px; color: #aabdaf; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .side-label { padding: 0 10px; color: #88a196; font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .navigation { display: grid; gap: 3px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px;
+      border: 0; border-radius: 9px; text-align: left; color: #cad7cc;
+      background: transparent; cursor: pointer; font-size: 12px;
+      transition: background .18s, color .18s, transform .18s;
+    }
+    .nav-link:hover { transform: translateX(2px); color: white; background: rgba(255,255,255,.09); }
+    .nav-link[aria-current="page"] { color: var(--dark); background: var(--lime); font-weight: 780; }
+    .nav-number { width: 21px; flex: none; color: #8ca497; font-size: 10px; font-variant-numeric: tabular-nums; }
+    .nav-link[aria-current="page"] .nav-number { color: var(--green); }
+    .side-note { margin-top: auto; padding: 13px 10px 0; border-top: 1px solid rgba(255,255,255,.14); color: #adbfaf; font-size: 11px; line-height: 1.65; }
+    .side-note strong { color: white; }
+    .main { min-width: 0; }
     .topbar {
-      position: sticky; z-index: 3; top: 0; display: flex; justify-content: space-between;
-      align-items: center; gap: 18px; padding: 14px max(22px, calc((100vw - 1120px) / 2));
-      border-bottom: 1px solid rgba(20,51,47,.09); background: rgba(244,246,239,.94);
-      backdrop-filter: blur(12px);
+      position: sticky; z-index: 4; top: 0; display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 12px clamp(17px,4vw,48px); border-bottom: 1px solid rgba(20,51,47,.08);
+      background: rgba(244,246,239,.93); backdrop-filter: blur(12px);
     }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 12px; color: var(--green-dark); background: var(--lime); font-size: 15px; font-weight: 900; }
-    .brand-title { font-size: 12px; font-weight: 800; }
-    .brand-sub { margin-top: 2px; color: var(--muted); font-size: 9px; letter-spacing: .11em; text-transform: uppercase; }
-    .nav { display: flex; flex-wrap: wrap; gap: 5px; }
-    .nav a { padding: 8px 10px; border-radius: 9px; text-decoration: none; color: var(--muted); font-size: 10px; font-weight: 650; transition: background .2s, color .2s; }
-    .nav a:hover { color: var(--green-dark); background: #e4ecd9; }
-    main { width: min(1120px, 100%); margin: 0 auto; padding: 26px 24px 60px; }
-    section { margin: 0 0 26px; }
-    .hero {
-      position: relative; overflow: hidden; min-height: 410px; padding: clamp(30px, 7vw, 70px);
-      border-radius: 27px; color: #f8f8ef; background: var(--green-dark);
+    .crumb { color: var(--muted); font-size: 12px; }
+    .crumb strong { color: var(--ink); }
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .progress { width: 76px; height: 4px; overflow: hidden; border-radius: 9px; background: #dbe2d7; }
+    .progress span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s; }
+    .page-count { min-width: 34px; color: var(--muted); font-size: 9px; text-align: right; font-variant-numeric: tabular-nums; }
+    .top-button {
+      display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line);
+      border-radius: 9px; background: var(--white); cursor: pointer;
     }
-    .hero::before, .hero::after { content: ""; position: absolute; border: 1px solid rgba(211,242,122,.24); border-radius: 50%; pointer-events: none; }
-    .hero::before { width: 410px; height: 410px; right: -120px; top: -122px; }
-    .hero::after { width: 275px; height: 275px; right: -50px; top: -54px; }
-    .eyebrow { color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
-    .hero .eyebrow { color: var(--lime); }
-    h1 { position: relative; z-index: 1; max-width: 720px; margin: 34px 0 14px; font-size: clamp(42px, 7vw, 76px); line-height: .96; letter-spacing: -.075em; }
+    .top-button:hover { border-color: #9db9a9; }
+    .menu-button { display: grid; }
+    .pages { width: min(1160px,100%); margin: 0 auto; padding: 26px clamp(17px,4vw,48px) 55px; }
+    .report-page { display: none; animation: enter .32s ease both; }
+    .report-page.active { display: block; }
+    @keyframes enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    .eyebrow { color: var(--green); font-size: 10px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 740px; margin: 25px 0 13px; font-size: clamp(43px,7vw,76px); line-height: .96; letter-spacing: -.075em; }
     h1 span { color: var(--lime); }
-    .hero-copy { position: relative; z-index: 1; max-width: 600px; margin: 0; color: #c4d2c8; font-size: 14px; line-height: 1.7; }
-    .hero-foot { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin-top: 47px; color: #bacbbf; font-size: 11px; line-height: 1.7; }
-    .hero-foot strong { display: block; color: white; font-size: 13px; }
-    .privacy-chip { padding: 9px 11px; border: 1px solid rgba(255,255,255,.2); border-radius: 10px; }
-    .privacy-chip::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--lime); }
-    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin: 38px 0 18px; }
-    h2 { margin: 8px 0 0; font-size: clamp(26px, 4vw, 41px); line-height: 1; letter-spacing: -.06em; }
-    .section-note { max-width: 430px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
-    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 11px; }
-    .metric { position: relative; overflow: hidden; min-height: 128px; padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); transition: transform .2s, box-shadow .2s; }
-    .metric:hover, .card:hover, .rating:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(20,59,53,.09); }
-    .metric::after { content: ""; position: absolute; right: -20px; bottom: -28px; width: 82px; height: 82px; border: 1px solid #e1e9d8; border-radius: 50%; }
-    .metric b { display: block; margin: 9px 0 5px; font-size: 32px; line-height: 1; letter-spacing: -.06em; }
-    .metric span { color: var(--muted); font-size: 10px; line-height: 1.5; }
-    .question { margin: 0 0 13px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); }
-    .question-label { margin-bottom: 5px; color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-    .question p { margin: 0; font-size: 11px; font-weight: 700; line-height: 1.55; }
-    .question small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; line-height: 1.5; }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
-    .card { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); transition: transform .2s, box-shadow .2s; }
-    .card h3 { margin: 0 0 11px; font-size: 12px; line-height: 1.5; }
-    .card h3 small { display: block; margin-bottom: 4px; color: var(--green); font-size: 9px; letter-spacing: .09em; text-transform: uppercase; }
-    .option-list { display: grid; gap: 6px; }
-    .option { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; align-items: center; padding: 8px 9px; border-radius: 9px; background: #f2f4ee; }
-    .option strong { display: block; font-size: 10px; line-height: 1.35; }
-    .option small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.4; }
-    .votes { min-width: 64px; color: var(--green); font-size: 10px; font-weight: 800; text-align: right; white-space: nowrap; }
-    .votes small { color: var(--muted); font-size: 8px; font-weight: 500; }
-    .rating-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-    .rating { display: grid; grid-template-columns: 61px minmax(0,1fr); gap: 11px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); transition: transform .2s, box-shadow .2s; }
-    .ring { width: 60px; height: 60px; }
-    .ring-track { fill: none; stroke: #e7ece3; stroke-width: 5; }
-    .ring-value { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
-    .ring-text { fill: var(--ink); font-size: 12px; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
-    .rating-title { margin-bottom: 5px; font-size: 10px; font-weight: 750; line-height: 1.45; }
-    .rating-avg { margin-bottom: 7px; color: var(--green); font-size: 9px; font-weight: 750; }
-    .rating-counts { display: flex; flex-wrap: wrap; gap: 4px; }
-    .rating-counts span { padding: 4px 5px; border-radius: 5px; color: #53635c; background: #f1f3ed; font-size: 8px; }
-    .rating-counts b { color: var(--ink); }
-    .skill-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-    .skill { padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); transition: transform .2s, box-shadow .2s; }
-    .skill-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
-    .skill-head strong { font-size: 11px; }
-    .skill-head b { flex: none; color: var(--green); font-size: 10px; }
-    .skill-desc { margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.45; }
-    .dots { display: grid; grid-template-columns: repeat(13, 8px); gap: 5px; margin: 12px 0 10px; }
-    .dots i { width: 7px; height: 7px; border-radius: 50%; background: #e6e9e1; }
-    .dots .much { background: var(--green); }
-    .dots .slight { background: #8dbbaa; }
-    .dots .same { background: var(--gold); }
-    .dots .lower { background: var(--coral); }
-    .dots .much-lower { background: #bd6558; }
-    .chips { display: flex; flex-wrap: wrap; gap: 4px; }
-    .chips span { padding: 4px 5px; border-radius: 5px; color: var(--muted); background: #f1f3ed; font-size: 8px; }
-    .chips b { color: var(--ink); }
-    .readiness { display: grid; grid-template-columns: .8fr 1.2fr; gap: 12px; }
-    .readiness-total { display: flex; flex-direction: column; justify-content: center; min-height: 150px; padding: 22px; border-radius: 17px; color: white; background: var(--green); }
-    .readiness-total small { color: var(--lime); font-size: 9px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-    .readiness-total b { margin: 14px 0 7px; font-size: 51px; line-height: .9; letter-spacing: -.08em; }
-    .readiness-total span { color: #d4dfd6; font-size: 10px; line-height: 1.5; }
-    .themes { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
-    .theme { padding: 17px; border-radius: 15px; background: #e9efdf; }
-    .theme:nth-child(2) { background: #e4eff0; }
-    .theme:nth-child(3) { background: #fff0e8; }
-    .theme:nth-child(4) { background: #f0eddd; }
-    .theme h3 { margin: 0 0 7px; font-size: 12px; }
-    .theme p { margin: 0; color: #53635c; font-size: 10px; line-height: 1.65; }
-    .theme-count { display: inline-block; margin-bottom: 10px; padding: 5px 7px; border-radius: 7px; background: rgba(255,255,255,.65); color: var(--green); font-size: 9px; font-weight: 750; }
-    .closing { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: center; padding: 25px; border-radius: 19px; color: white; background: var(--green-dark); }
-    .closing h2 { max-width: 550px; margin: 10px 0; }
-    .closing p { max-width: 580px; margin: 0; color: #c9d8cc; font-size: 11px; line-height: 1.7; }
-    .orbit { justify-self: center; display: grid; place-items: center; width: 138px; height: 138px; border: 1px solid rgba(211,242,122,.42); border-radius: 50%; box-shadow: 0 0 0 19px rgba(211,242,122,.05), 0 0 0 40px rgba(211,242,122,.035); }
-    .orbit span { display: grid; place-items: center; width: 70px; height: 70px; border-radius: 24px; color: var(--green-dark); background: var(--lime); font-size: 18px; font-weight: 900; }
-    footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.6; }
-    @media (max-width: 760px) {
-      .topbar { align-items: flex-start; flex-direction: column; padding: 12px 18px 9px; }
-      .nav { overflow-x: auto; flex-wrap: nowrap; width: 100%; padding-bottom: 3px; }
-      .nav a { flex: none; }
-      main { padding: 17px 15px 40px; }
-      .hero { min-height: 410px; border-radius: 20px; }
-      .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
-      .metric { min-height: 118px; padding: 13px; }
-      .metric b { font-size: 29px; }
-      .grid-2, .rating-grid, .skill-grid, .themes, .closing, .readiness { grid-template-columns: 1fr; }
-      .hero-foot { align-items: flex-start; flex-direction: column; margin-top: 33px; }
-      .privacy-chip { font-size: 10px; }
-      .section-head { align-items: flex-start; flex-direction: column; }
-      .orbit { margin: 10px 0 18px; }
+    h2 { margin: 8px 0 9px; font-size: clamp(29px,4vw,45px); line-height: 1.02; letter-spacing: -.06em; }
+    h3 { margin-bottom: 8px; font-size: 13px; letter-spacing: -.025em; }
+    .lede { max-width: 650px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .page-head .lede { margin-bottom: 0; }
+    .section-index { flex: none; color: #a2b3a5; font-size: 38px; font-weight: 800; letter-spacing: -.09em; }
+    .cover {
+      position: relative; overflow: hidden; min-height: 440px; padding: clamp(28px,6vw,58px);
+      border-radius: 25px; color: #f8f8ef; background: var(--dark); box-shadow: var(--shadow);
     }
-    @media print {
-      .topbar { position: static; }
-      .nav { display: none; }
-      main { padding: 8mm; }
-      section { break-inside: avoid; }
-      .hero, .readiness-total, .closing { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-      .metric, .card, .rating, .skill { break-inside: avoid; }
+    .cover::before, .cover::after { content: ""; position: absolute; border: 1px solid rgba(211,242,122,.24); border-radius: 50%; pointer-events: none; }
+    .cover::before { width: 420px; height: 420px; right: -120px; top: -115px; }
+    .cover::after { width: 285px; height: 285px; right: -55px; top: -48px; }
+    .cover .eyebrow { color: var(--lime); }
+    .cover-copy { position: relative; z-index: 1; max-width: 710px; margin-top: 36px; }
+    .cover h1 { margin-top: 0; }
+    .cover h1 span { color: var(--lime); }
+    .cover .lede { color: #c4d2c8; }
+    .cover-foot { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin-top: 47px; color: #bacbbf; font-size: 10px; line-height: 1.7; }
+    .cover-foot strong { display: block; color: white; font-size: 13px; }
+    .cover-stamp { padding: 10px 12px; border: 1px solid rgba(255,255,255,.2); border-radius: 11px; color: white; }
+    .cover-stamp::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--lime); }
+    .metric-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin: 16px 0; }
+    .metric { position: relative; overflow: hidden; min-height: 126px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); transition: transform .2s, box-shadow .2s; }
+    .metric:hover, .card:hover, .rating-card:hover, .theme-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .metric::after { content: ""; position: absolute; right: -20px; bottom: -27px; width: 78px; height: 78px; border: 1px solid #dfe9d6; border-radius: 50%; }
+    .metric-label { color: var(--muted); font-size: 11px; }
+    .metric-value { display: block; margin: 10px 0 6px; font-size: 31px; font-weight: 800; line-height: 1; letter-spacing: -.07em; font-variant-numeric: tabular-nums; }
+    .metric-detail { color: var(--green); font-size: 11px; font-weight: 720; line-height: 1.45; }
+    .insight-grid { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(220px,.7fr); gap: 12px; }
+    .insight { padding: 19px; border-radius: 17px; background: #e9efdf; }
+    .insight.dark { color: white; background: var(--green); }
+    .insight .eyebrow { margin-bottom: 10px; }
+    .insight.dark .eyebrow { color: var(--lime); }
+    .insight h3 { margin-bottom: 7px; font-size: 14px; }
+    .insight p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .insight.dark p { color: #d1e0d5; }
+    .kpi-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+    .kpi { padding: 8px 9px; border: 1px solid #d9e3d1; border-radius: 9px; background: rgba(255,255,255,.62); font-size: 10px; color: var(--muted); }
+    .kpi strong { display: block; margin-bottom: 3px; color: var(--ink); font-size: 14px; }
+    .question-panel { margin-bottom: 14px; padding: 13px 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--white); }
+    .question-label { margin-bottom: 5px; color: var(--green); font-size: 10px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+    .question-text { margin: 0; font-size: 13px; font-weight: 720; line-height: 1.55; }
+    .question-note { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .question-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    #experience .question-grid { grid-template-columns: minmax(0,1fr); }
+    .question-card { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); }
+    .question-card h3 { min-height: 34px; margin: 0 0 11px; font-size: 12px; line-height: 1.5; }
+    .question-card h3 small { display: block; margin-bottom: 4px; color: var(--green); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+    .chart-row { display: grid; grid-template-columns: 190px minmax(0,1fr); gap: 18px; align-items: center; max-width: 850px; margin: 0 auto; }
+    .donut-wrap { position: relative; display: grid; place-items: center; min-height: 195px; }
+    .donut { width: 180px; height: 180px; overflow: visible; }
+    .donut-track { fill: none; stroke: #e9ede5; stroke-width: 18; }
+    .donut-segment { fill: none; stroke-width: 18; stroke-linecap: butt; transition: stroke-width .2s ease, filter .2s ease, opacity .2s ease; cursor: pointer; }
+    .donut-segment:hover, .donut-segment:focus { stroke-width: 23; filter: drop-shadow(0 3px 4px rgba(20,51,47,.18)); outline: none; }
+    .rating-value { fill: none; stroke: var(--green); stroke-width: 4; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+    .donut-total { fill: var(--ink); font-size: 27px; font-weight: 850; letter-spacing: -.08em; text-anchor: middle; }
+    .donut-caption { fill: var(--muted); font-size: 7px; font-weight: 750; letter-spacing: .11em; text-anchor: middle; }
+    .donut-foot { fill: var(--muted); font-size: 7px; text-anchor: middle; }
+    .vote-legend { display: grid; gap: 5px; }
+    .vote-item { display: grid; grid-template-columns: 8px minmax(0,1fr) auto; gap: 6px; align-items: center; padding: 6px 7px; border: 1px solid transparent; border-radius: 8px; transition: background .18s, transform .18s; }
+    .vote-item:hover { transform: translateX(2px); border-color: var(--line); background: #f8f9f4; }
+    .swatch { width: 7px; height: 19px; border-radius: 5px; }
+    .vote-name { font-size: 11px; font-weight: 750; }
+    .vote-desc { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+    .vote-count { color: var(--green); font-size: 12px; font-weight: 850; text-align: right; white-space: nowrap; }
+    .vote-count small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; font-weight: 500; }
+    .card-foot { margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .scale-panel { margin-bottom: 12px; padding: 12px 14px; border: 1px solid #f0dfc5; border-radius: 12px; background: #fff9ee; }
+    .scale-panel strong { display: block; margin-bottom: 7px; color: #855b25; font-size: 10px; }
+    .scale-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .scale-list span { padding: 5px 7px; border: 1px solid #f0e2d0; border-radius: 6px; color: #685640; background: #fffdfa; font-size: 9px; }
+    .rating-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+    .rating-card { display: grid; grid-template-columns: 59px minmax(0,1fr); gap: 9px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); transition: transform .2s, box-shadow .2s; }
+    .rating-ring { width: 57px; height: 57px; }
+    .rating-title { margin-bottom: 5px; font-size: 11px; font-weight: 730; line-height: 1.45; }
+    .rating-average { margin-bottom: 6px; color: var(--green); font-size: 10px; font-weight: 800; }
+    .rating-distribution { display: flex; flex-wrap: wrap; gap: 3px; }
+    .rating-chip { padding: 4px 5px; border-radius: 5px; color: var(--muted); background: #f1f3ed; font-size: 9px; line-height: 1.3; }
+    .rating-chip strong { color: var(--ink); }
+    .skills { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .skill-card { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); }
+    .skill-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .skill-name { font-size: 12px; font-weight: 760; line-height: 1.4; }
+    .skill-up { flex: none; color: var(--green); font-size: 10px; font-weight: 850; }
+    .skill-detail { margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+    .dot-field { display: grid; grid-template-columns: repeat(13,7px); gap: 4px; margin: 10px 0 8px; }
+    .dot-field i { width: 7px; height: 7px; border-radius: 50%; background: #e6e9e1; }
+    .dot-field i.much { background: var(--green); }
+    .dot-field i.slight { background: #ffc29e; }
+    .dot-field i.same { background: var(--gold); }
+    .dot-field i.lower { background: var(--coral); }
+    .dot-field i.much-lower { background: #bd6558; }
+    .skill-legend { display: flex; flex-wrap: wrap; gap: 4px; }
+    .skill-chip { padding: 4px 5px; border-radius: 5px; color: var(--muted); background: #f1f3ed; font-size: 9px; }
+    .skill-chip strong { color: var(--ink); }
+    .readiness-layout { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 12px; }
+    .readiness-stat { display: flex; flex-direction: column; justify-content: center; min-height: 220px; padding: 21px; border-radius: 17px; color: white; background: var(--green); }
+    .readiness-stat .eyebrow { color: var(--lime); }
+    .readiness-big { margin: 19px 0 7px; font-size: 62px; line-height: .9; font-weight: 850; letter-spacing: -.09em; }
+    .readiness-stat p { margin: 0; color: #d3dfd6; font-size: 10px; line-height: 1.6; }
+    .option-list { display: grid; gap: 6px; }
+    .option-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 8px 9px; border-radius: 9px; background: #f2f4ee; }
+    .option-name { display: block; font-size: 11px; font-weight: 720; line-height: 1.4; }
+    .option-desc { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.45; }
+    .option-votes { min-width: 55px; color: var(--green); font-size: 11px; font-weight: 850; text-align: right; white-space: nowrap; }
+    .option-votes small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; font-weight: 500; }
+    .treemap-card { width: min(100%, 990px); margin: 0 auto; padding: 22px; border: 1px solid var(--line); border-radius: 20px; background: var(--white); }
+    .treemap { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); grid-template-rows: repeat(2,minmax(145px,1fr)) repeat(4,minmax(75px,auto)); gap: 9px; min-height: 0; margin-top: 15px; }
+    .tree-cell { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; min-height: 0; overflow: hidden; padding: clamp(12px,2vw,24px); border: 0; border-radius: 14px; text-align: left; color: var(--dark); cursor: default; transition: transform .18s, filter .18s, box-shadow .18s; }
+    .tree-cell:hover, .tree-cell:focus { z-index: 1; transform: scale(1.015); filter: saturate(1.1); box-shadow: 0 9px 18px rgba(20,51,47,.16); outline: none; }
+    .tree-cell strong { font-size: clamp(23px,3.8vw,42px); line-height: .9; letter-spacing: -.07em; }
+    .tree-cell span { font-size: clamp(11px,1.3vw,15px); font-weight: 770; line-height: 1.3; }
+    .tree-cell small { margin-top: 4px; font-size: 11px; opacity: .82; }
+    .tree-main { grid-column: 1 / span 5; grid-row: 1 / span 2; background: var(--green); color: white; }
+    .tree-present { grid-column: 6 / span 4; grid-row: 1 / span 2; background: var(--blue); }
+    .tree-bi { grid-column: 10 / span 3; grid-row: 1 / span 2; background: #a4d0bf; }
+    .tree-readiness { grid-column: 1 / -1; grid-row: 3; background: #f6d990; }
+    .tree-thinking { grid-column: 1 / -1; grid-row: 4; background: #ffd1c2; }
+    .tree-portfolio { grid-column: 1 / -1; grid-row: 5; background: var(--lavender); }
+    .tree-other { grid-column: 1 / -1; grid-row: 6; background: #efdfd6; }
+    .tree-main small { opacity: .86; }
+    .tree-thinking, .tree-portfolio, .tree-other { min-height: 88px; }
+    .zero-options { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .zero-chip { padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--white); font-size: 10px; }
+    .zero-chip strong { color: var(--ink); }
+    .treemap-zero { margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .skill-key { display: flex; flex-wrap: wrap; gap: 7px 12px; margin: -2px 0 12px; color: var(--muted); font-size: 12px; }
+    .skill-key span { display: inline-flex; align-items: center; gap: 5px; }
+    .skill-key i { width: 9px; height: 9px; border-radius: 50%; }
+    .theme-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .theme-card { min-height: 125px; padding: 15px; border-radius: 14px; background: #e9efdf; transition: transform .2s, box-shadow .2s; }
+    .theme-card:nth-child(2) { background: #e4eff0; }
+    .theme-card:nth-child(3) { background: #fff0e8; }
+    .theme-card:nth-child(4) { background: #f0eddd; }
+    .theme-card h3 { margin: 0 0 6px; font-size: 11px; }
+    .theme-card p { margin: 0; color: #53635c; font-size: 11px; line-height: 1.65; }
+    .theme-badge { display: inline-block; margin-bottom: 9px; padding: 5px 7px; border-radius: 6px; color: var(--green); background: rgba(255,255,255,.65); font-size: 9px; font-weight: 780; }
+    .callout { margin-top: 13px; padding: 12px 14px; border-left: 3px solid var(--coral); border-radius: 0 10px 10px 0; color: #53635c; background: #fff0e8; font-size: 9px; line-height: 1.6; }
+    .callout strong { color: var(--ink); }
+    .closing { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(160px,.8fr); gap: 15px; align-items: center; padding: 23px; border-radius: 18px; color: white; background: var(--dark); }
+    .closing .eyebrow { color: var(--lime); }
+    .closing h2 { max-width: 540px; }
+    .closing p { max-width: 560px; margin: 0; color: #c9d8cc; font-size: 12px; line-height: 1.7; }
+    .orbit { justify-self: center; display: grid; place-items: center; width: 130px; height: 130px; border: 1px solid rgba(211,242,122,.42); border-radius: 50%; box-shadow: 0 0 0 17px rgba(211,242,122,.05), 0 0 0 36px rgba(211,242,122,.035); }
+    .orbit span { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 22px; color: var(--dark); background: var(--lime); font-size: 18px; font-weight: 900; }
+    .orbit span img { width: 48px; height: 48px; border-radius: 14px; object-fit: contain; background: white; }
+    .source-note { margin-top: 13px; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .page-controls { display: flex; justify-content: space-between; gap: 9px; margin-top: 19px; }
+    .control { padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: var(--white); cursor: pointer; font-size: 11px; transition: transform .18s, border-color .18s; }
+    .app.sidebar-collapsed { grid-template-columns: 72px minmax(0,1fr); }
+    .sidebar-collapsed .sidebar { align-items: center; padding-right: 9px; padding-left: 9px; }
+    .sidebar-collapsed .brand { justify-content: center; padding: 0; }
+    .sidebar-collapsed .brand > span:last-child, .sidebar-collapsed .side-label, .sidebar-collapsed .side-note,
+    .sidebar-collapsed .nav-link > span:last-child { display: none; }
+    .sidebar-collapsed .navigation { width: 100%; }
+    .sidebar-collapsed .nav-link { justify-content: center; padding: 10px 4px; }
+    .sidebar-collapsed .nav-number { width: auto; font-size: 10px; }
+    .menu-button { flex: none; }
+    .crumb { font-size: 14px; }
+    .nav-link { font-size: 14px; }
+    .side-label { font-size: 12px; }
+    .side-note { font-size: 13px; }
+    .eyebrow { font-size: 12px; }
+    .lede { font-size: 16px; }
+    .metric-label, .metric-detail, .question-note, .option-desc, .card-foot, .source-note { font-size: 13px; }
+    .metric-detail { line-height: 1.5; }
+    .question-label, .scale-panel strong { font-size: 12px; }
+    .question-text { font-size: 16px; }
+    .question-card h3 { font-size: 15px; }
+    .question-card h3 small { font-size: 11px; }
+    .vote-name, .option-name, .skill-name, .rating-title, .theme-card h3 { font-size: 14px; }
+    .vote-desc, .vote-count small, .rating-chip, .skill-detail, .skill-chip, .theme-card p, .callout, .scale-list span { font-size: 12px; }
+    .vote-count, .option-votes, .rating-average, .section-index { font-size: 14px; }
+    .tree-cell span { font-size: clamp(12px,1.5vw,17px); }
+    .tree-cell small { font-size: 13px; }
+    .control:hover { transform: translateY(-1px); border-color: #9db9a9; }
+    .control.primary { border-color: var(--green); color: white; background: var(--green); }
+    .control:disabled { opacity: .4; cursor: default; transform: none; }
+    @media (max-width: 930px) {
+      .app { grid-template-columns: 220px minmax(0,1fr); }
+      .chart-row { grid-template-columns: 170px minmax(0,1fr); }
+      .donut-wrap { min-height: 175px; }
+      .question-card h3 { min-height: auto; }
+      .insight-grid { grid-template-columns: 1fr; }
+      .treemap { min-height: 330px; }
+    }
+    @media (max-width: 680px) {
+      .app { display: block; }
+      .sidebar { position: fixed; z-index: 8; top: 0; left: 0; width: min(290px,84vw); transform: translateX(-105%); transition: transform .24s; box-shadow: 14px 0 32px rgba(0,0,0,.2); }
+      .sidebar.open { transform: translateX(0); }
+      .app.sidebar-collapsed { display: block; }
+      .topbar { justify-content: flex-start; }
+      .top-actions { margin-left: auto; }
+      .pages { padding-top: 18px; }
+      .cover { min-height: 440px; border-radius: 19px; }
+      .cover-foot { align-items: flex-start; flex-direction: column; margin-top: 33px; }
+      .metric-grid { gap: 7px; }
+      .metric { min-height: 115px; padding: 12px; }
+      .metric-value { font-size: 27px; }
+      .rating-grid, .skills, .theme-grid { grid-template-columns: 1fr; }
+      .readiness-layout { grid-template-columns: 1fr; }
+      .readiness-stat { min-height: 160px; }
+      .closing { grid-template-columns: 1fr; }
+      .orbit { margin: 10px 0 15px; }
+      .chart-row { grid-template-columns: 145px minmax(0,1fr); }
+      .treemap { grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: none; grid-auto-rows: minmax(100px,auto); min-height: 0; }
+      .tree-cell { grid-column: auto; grid-row: auto; }
+      .tree-main, .tree-present { grid-column: span 2; min-height: 155px; }
+      .tree-bi, .tree-readiness, .tree-thinking, .tree-portfolio, .tree-other { grid-column: span 2; }
+      .tree-thinking, .tree-portfolio, .tree-other { min-height: 100px; }
+      .treemap-card { padding: 14px; }
+    }
+    @media (max-width: 390px) {
+      .chart-row { grid-template-columns: 1fr; }
+      .donut-wrap { min-height: 140px; }
+      .tree-cell { padding: 10px; }
+      .tree-cell span { font-size: 12px; }
+      .tree-cell small { display: block; font-size: 11px; }
+      .progress { width: 48px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    @media print {
+      :root { --paper: #fff; --white: #fff; }
+      body { background: white; }
+      .app { display: block; }
+      .sidebar, .topbar, .page-controls { display: none !important; }
+      .pages { width: 100%; max-width: none; padding: 0; }
+      .report-page, .report-page.active { display: block !important; min-height: 90vh; padding: 10mm; page-break-after: always; break-after: page; animation: none; }
+      .report-page:last-child { page-break-after: auto; break-after: auto; }
+      .cover, .insight.dark, .readiness-stat, .closing { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .metric, .question-card, .rating-card, .skill-card, .theme-card { break-inside: avoid; box-shadow: none; }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#top" aria-label="Shamzbridge Cohort 2 feedback report">
-      <span class="brand-mark" aria-hidden="true">sb</span>
-      <span><span class="brand-title">Shamzbridge</span><span class="brand-sub">Cohort 2 · Data Analytics</span></span>
-    </a>
-    <nav class="nav" aria-label="Report sections">
-      <a href="#overview">Overview</a><a href="#experience">Experience</a><a href="#delivery">Delivery</a>
-      <a href="#habits">Learner habits</a><a href="#skills">Skills</a><a href="#readiness">Readiness</a>
-      <a href="#support">Support</a><a href="#themes">Written feedback</a>
-    </nav>
-  </header>
-  <main id="top">
-    <section class="hero" id="overview">
-      <div class="eyebrow">Student voice · End-of-programme feedback</div>
-      <h1>Learning that moves <span>people forward.</span></h1>
-      <p class="hero-copy">An aggregate readout of the Shamzbridge Data Analytics second cohort—what worked, what grew, and where the next cohort can go further.</p>
-      <div class="hero-foot"><div><strong>Shamzbridge · Cohort 2</strong>Feedback collected 27–30 October 2026<br>Based on 26 submitted responses</div><div class="privacy-chip">Published as aggregate results only · no individual responses</div></div>
-    </section>
-
-    <section aria-labelledby="snapshot-title">
-      <div class="section-head"><div><div class="eyebrow">The signal</div><h2 id="snapshot-title">Strong experience. Clear next step.</h2></div><p class="section-note">The cohort valued practical learning and supportive people. Students also signalled where more practice and room in the schedule would help.</p></div>
-      <div class="metrics">
-        <article class="metric"><div class="eyebrow">Responses</div><b>26</b><span>End-of-programme forms submitted</span></article>
-        <article class="metric"><div class="eyebrow">Experience</div><b>24/26</b><span>rated it Excellent or Very good</span></article>
-        <article class="metric"><div class="eyebrow">Expectations</div><b>22/26</b><span>said the programme exceeded expectations</span></article>
-        <article class="metric"><div class="eyebrow">Power BI</div><b>23/26</b><span>reported higher ability than at programme start</span></article>
-      </div>
-    </section>
-
-    <section id="experience">
-      <div class="section-head"><div><div class="eyebrow">01 · Overall experience</div><h2>Positive ratings across the cohort.</h2></div><p class="section-note">Each option shows the vote count and share of 26 submitted answers. Zero-vote options are retained for context.</p></div>
-      <article class="question"><div class="question-label">Question 1 · Multiple choice</div><p>Overall, how would you rate your experience with the programme?</p><small>Excellent — Outstanding quality, exceeded all benchmarks · Very good — High standard, delivered exceptional value · Good — Satisfactory and solid learning experience · Fair — Adequate but notable areas need improvement · Poor — Did not meet core expectations or standards</small></article>
-      <div class="grid-2">
-        <article class="card"><h3><small>Question 1 · 26 responses</small>Overall programme experience</h3><div class="option-list">
-          <div class="option"><div><strong>Excellent</strong><small>Outstanding quality, exceeded all benchmarks</small></div><div class="votes">19/26<small>73%</small></div></div>
-          <div class="option"><div><strong>Very good</strong><small>High standard, delivered exceptional value</small></div><div class="votes">5/26<small>19%</small></div></div>
-          <div class="option"><div><strong>Good</strong><small>Satisfactory and solid learning experience</small></div><div class="votes">2/26<small>8%</small></div></div>
-          <div class="option"><div><strong>Fair</strong><small>Adequate but notable areas need improvement</small></div><div class="votes">0/26<small>0%</small></div></div>
-          <div class="option"><div><strong>Poor</strong><small>Did not meet core expectations or standards</small></div><div class="votes">0/26<small>0%</small></div></div>
-        </div></article>
-        <article class="card"><h3><small>Question 2 · 26 responses</small>To what extent did the programme meet your expectations?</h3><div class="option-list">
-          <div class="option"><div><strong>Exceeded my expectations</strong><small>Delivered significantly more than anticipated</small></div><div class="votes">22/26<small>85%</small></div></div>
-          <div class="option"><div><strong>Met my expectations</strong><small>Covered what was promised and intended</small></div><div class="votes">4/26<small>15%</small></div></div>
-          <div class="option"><div><strong>Partially met my expectations</strong><small>Met some requirements, fell short in others</small></div><div class="votes">0/26<small>0%</small></div></div>
-          <div class="option"><div><strong>Fell below my expectations</strong><small>Significantly missed key expectations</small></div><div class="votes">0/26<small>0%</small></div></div>
-        </div></article>
-        <article class="card"><h3><small>Question 3 · 26 responses</small>How would you rate the overall organization and coordination of the programme?</h3><div class="option-list">
-          <div class="option"><div><strong>Excellent</strong></div><div class="votes">16/26<small>62%</small></div></div>
-          <div class="option"><div><strong>Very good</strong></div><div class="votes">8/26<small>31%</small></div></div>
-          <div class="option"><div><strong>Good</strong></div><div class="votes">2/26<small>8%</small></div></div>
-          <div class="option"><div><strong>Fair</strong></div><div class="votes">0/26<small>0%</small></div></div>
-          <div class="option"><div><strong>Poor</strong></div><div class="votes">0/26<small>0%</small></div></div>
-        </div></article>
-      </div>
-    </section>
-
-    <section id="delivery">
-      <div class="section-head"><div><div class="eyebrow">02 · Programme team & training delivery</div><h2>Practical work leads. Pace can improve.</h2></div><p class="section-note">Ring value is the average rating out of five. Each card includes the exact question, vote count and distribution across the form scale.</p></div>
-      <article class="question"><div class="question-label">Questions 5–9 · Scale 1–5</div><p>1 = Strongly disagree · 2 = Disagree · 3 = Neither agree nor disagree · 4 = Agree · 5 = Strongly agree</p></article>
-      <div class="rating-grid" id="deliveryRatings"></div>
-    </section>
-
-    <section id="habits">
-      <div class="section-head"><div><div class="eyebrow">03 · Student self-assessment & commitment</div><h2>Commitment was strong. Time was tighter.</h2></div><p class="section-note">An average of 4.0 means the mean of the recorded 1–5 responses. On the outside-class-time question, 26 votes contributed to the score.</p></div>
-      <article class="question"><div class="question-label">Questions 11–14 · Scale 1–5</div><p>1 = Strongly disagree · 2 = Disagree · 3 = Neither agree nor disagree · 4 = Agree · 5 = Strongly agree</p></article>
-      <div class="rating-grid" id="habitRatings"></div>
-    </section>
-
-    <section id="skills">
-      <div class="section-head"><div><div class="eyebrow">04 · Skills gained</div><h2>Self-reported growth across all six skills.</h2></div><p class="section-note">Each dot represents one response. The vote chips show the number selecting each option; direction is self-assessed, not a pre/post test.</p></div>
-      <article class="question"><div class="question-label">Question 16 · Multiple-choice grid</div><p>How would you rate your current ability in each area compared with when you started the programme?</p><small>Form options: Much Lower · Slightly Lower · About Same · Slightly Higher · Much Higher</small></article>
-      <div class="skill-grid" id="skillGrid"></div>
-    </section>
-
-    <section id="readiness">
-      <div class="section-head"><div><div class="eyebrow">05 · Skills gained & readiness</div><h2>Most feel prepared to apply their skills.</h2></div><p class="section-note">The chart uses the full set of response options, including those with no votes.</p></div>
-      <article class="question"><div class="question-label">Question 17 · Multiple choice</div><p>How prepared do you feel to use your data analytics skills to solve a real-world business problem independently?</p><small>Very prepared — Confident to tackle end-to-end industry briefs independently · Somewhat prepared — Can handle tasks with standard documentation and mentorship · Neither prepared nor unprepared — Neutral, requires structured environment · Slightly unprepared — Feel hesitation on complex business projects · Not prepared at all — Require comprehensive additional training</small></article>
-      <div class="readiness"><article class="readiness-total"><small>Prepared or somewhat prepared</small><b>23/26</b><span>88% of responses</span></article><article class="card"><div class="option-list">
-        <div class="option"><div><strong>Very prepared</strong><small>Confident to tackle end-to-end industry briefs independently</small></div><div class="votes">14/26<small>54%</small></div></div>
-        <div class="option"><div><strong>Somewhat prepared</strong><small>Can handle tasks with standard documentation and mentorship</small></div><div class="votes">9/26<small>35%</small></div></div>
-        <div class="option"><div><strong>Neither prepared nor unprepared</strong><small>Neutral, requires structured environment</small></div><div class="votes">0/26<small>0%</small></div></div>
-        <div class="option"><div><strong>Slightly unprepared</strong><small>Feel hesitation on complex business projects</small></div><div class="votes">3/26<small>12%</small></div></div>
-        <div class="option"><div><strong>Not prepared at all</strong><small>Require comprehensive additional training</small></div><div class="votes">0/26<small>0%</small></div></div>
-      </div></article></div>
-    </section>
-
-    <section id="support">
-      <div class="section-head"><div><div class="eyebrow">06 · Practice & support needs</div><h2>SQL is the clearest support signal.</h2></div><p class="section-note">One response per learner. Vote totals add up to 26; the complete option list is shown.</p></div>
-      <article class="question"><div class="question-label">Question 18 · Single choice</div><p>Which area do you still need the most support or practice in?</p></article>
-      <div class="grid-2">
-        <article class="card"><h3>Support area selections · 26 responses</h3><div class="option-list">
-          <div class="option"><strong>Excel</strong><div class="votes">0/26<small>0%</small></div></div>
-          <div class="option"><strong>SQL</strong><div class="votes">10/26<small>38%</small></div></div>
-          <div class="option"><strong>Power BI</strong><div class="votes">4/26<small>15%</small></div></div>
-          <div class="option"><strong>Analytical thinking and problem-solving</strong><div class="votes">1/26<small>4%</small></div></div>
-          <div class="option"><strong>Data visualisation and storytelling</strong><div class="votes">0/26<small>0%</small></div></div>
-          <div class="option"><strong>Presenting and communicating findings</strong><div class="votes">6/26<small>23%</small></div></div>
-          <div class="option"><strong>Portfolio development and real-world projects</strong><div class="votes">1/26<small>4%</small></div></div>
-          <div class="option"><strong>Job readiness and professional development</strong><div class="votes">3/26<small>12%</small></div></div>
-          <div class="option"><strong>Other</strong><div class="votes">1/26<small>4%</small></div></div>
-        </div></article>
-        <article class="card"><h3>What to strengthen</h3><p class="section-note">Prioritise additional SQL practice, then coached opportunities to present and explain findings. Power BI was another recurring area for support.</p></article>
-      </div>
-    </section>
-
-    <section id="themes">
-      <div class="section-head"><div><div class="eyebrow">07 · Written feedback · aggregate themes</div><h2>Keep the human touch. Make room for practice.</h2></div><p class="section-note">Themes below summarise written responses; no individual comments or student-level cards are published.</p></div>
-      <div class="question"><div class="question-label">Question 4 · 26 meaningful responses</div><p>What was the most valuable aspect of the programme for you, and why?</p><small>Most-mentioned themes: practical learning and real projects; coaches and facilitators; professional development, guest leaders and mentorship; presentations and peer learning.</small></div>
-      <div class="question"><div class="question-label">Question 10 · 10 meaningful responses · optional</div><p>What should the programme team improve in its teaching, support, communication, scheduling, or general coordination?</p></div>
-      <div class="question"><div class="question-label">Question 15 · 25 meaningful responses</div><p>What is one thing you could have done differently to get more value from this programme?</p><small>Recurring theme: dedicate more time to revision, independent practice, personal projects, and asking questions.</small></div>
-      <div class="question"><div class="question-label">Question 19 · 26 meaningful responses</div><p>What was the biggest challenge you faced during the programme, and how did it affect your learning?</p></div>
-      <div class="question"><div class="question-label">Question 20 · 21 meaningful responses</div><p>If you could change one thing about the programme to make it more effective for future students, what would it be?</p></div>
-      <div class="question"><div class="question-label">Question 21 · 25 meaningful responses</div><p>What would you say are the programme’s greatest strengths, and what are its most important areas for improvement?</p></div>
-      <div class="themes">
-        <article class="theme"><span class="theme-count">Strengths to preserve</span><h3>People, projects and exposure</h3><p>Written feedback repeatedly highlights committed coaches, practical project work, professional development, guest leaders and mentorship.</p></article>
-        <article class="theme"><span class="theme-count">Learning design</span><h3>More time to practise</h3><p>Students want more hands-on time between tools, space to revise and practise independently, and deadlines that are easier to balance.</p></article>
-        <article class="theme"><span class="theme-count">Support priorities</span><h3>Build skills and confidence</h3><p>Additional SQL and Power BI practice, clearer technical support, and more chances to present insights are recurring improvement themes.</p></article>
-        <article class="theme"><span class="theme-count">Learning environment</span><h3>Make practice more accessible</h3><p>Some feedback calls for improved access to a suitable place, equipment, connectivity and time to continue learning outside class.</p></article>
-      </div>
-    </section>
-
-    <section class="closing">
-      <div><div class="eyebrow" style="color:var(--lime)">The takeaway</div><h2>Keep what works. Give practice more room.</h2><p>Students rated the programme experience highly and reported skill gains. Preserve the practical, people-centred strengths while creating more supported time for technical practice, communicating findings and a manageable learning pace.</p></div>
-      <div class="orbit" aria-hidden="true"><span>sb</span></div>
-    </section>
-    <footer><span>Source: Shamzbridge Cohort 2 end-of-programme feedback · 26 responses</span><span>Aggregate report · No individual feedback or identifiers included</span></footer>
-  </main>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="Report navigation">
+      <a class="brand" href="#overview" style="color:inherit;text-decoration:none">
+        <img class="brand-mark" src="images/shamzbridge%20icon.jpeg" alt="Shamzbridge">
+        <span><span class="brand-name">Shamzbridge</span><span class="brand-sub">Cohort 2 · Data Analytics</span></span>
+      </a>
+      <div class="side-label">Report contents</div>
+      <nav class="navigation" id="navigation"></nav>
+      <div class="side-note"><strong>Student voice, protected.</strong><br>26 submitted responses<br>Aggregate results and themes only<br>No names or individual comments</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="top-button menu-button" id="menuToggle" aria-label="Collapse report navigation" aria-expanded="true" title="Collapse report navigation">
+          <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+        <div class="crumb">Shamzbridge <span aria-hidden="true">/</span> <strong id="currentTitle">At a glance</strong></div>
+        <div class="top-actions">
+          <div class="progress" aria-label="Report progress"><span id="progressBar"></span></div>
+          <span class="page-count" id="pageCount"></span>
+          <button class="top-button" id="printButton" aria-label="Print or save the report as PDF" title="Print / save PDF">
+            <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 5V2.5h7V5m-7 6.5h-2v-5h11v5h-2m-7-2h7v4h-7z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="11.5" cy="7.5" r=".6" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </header>
+      <div class="pages" id="pages"></div>
+    </main>
+  </div>
   <script>
-    const responses = 26;
-    const ratingScale = [
+    const TOTAL = 26;
+    const COLORS = ["#f36621", "#85b7a3", "#ff886e", "#d9d9f0", "#f5ca67"];
+    const PAGE_DEFS = [
+      { id: "overview", label: "The cohort at a glance", short: "At a glance" },
+      { id: "experience", label: "Overall programme experience", short: "Experience" },
+      { id: "delivery", label: "Programme team & delivery", short: "Training delivery" },
+      { id: "habits", label: "Student self-assessment", short: "Learner habits" },
+      { id: "skills", label: "Skills gained", short: "Skills gained" },
+      { id: "readiness", label: "Readiness for real work", short: "Readiness" },
+      { id: "support", label: "Where support is needed", short: "Support needs" },
+      { id: "q4", label: "What learners valued", short: "Most valuable · Q4" },
+      { id: "q10", label: "Suggestions for the programme team", short: "Team suggestions · Q10" },
+      { id: "q15", label: "Learner reflections", short: "Learner reflection · Q15" },
+      { id: "q19", label: "Challenges faced", short: "Challenges · Q19" },
+      { id: "q20", label: "One change for the next cohort", short: "One change · Q20" },
+      { id: "q21", label: "Strengths & areas to improve", short: "Strengths · Q21" },
+      { id: "closing", label: "What the feedback says", short: "Closing note" }
+    ];
+    const EXPERIENCE = [
+      {
+        id: "experience-rating", number: "Question 1", prompt: "Overall, how would you rate your experience with the programme?",
+        answers: [19, 5, 2, 0, 0],
+        options: [
+          ["Excellent", "Outstanding quality, exceeded all benchmarks"],
+          ["Very good", "High standard, delivered exceptional value"],
+          ["Good", "Satisfactory and solid learning experience"],
+          ["Fair", "Adequate but notable areas need improvement"],
+          ["Poor", "Did not meet core expectations or standards"]
+        ]
+      },
+      {
+        id: "expectations", number: "Question 2", prompt: "To what extent did the programme meet your expectations?",
+        answers: [22, 4, 0, 0],
+        options: [
+          ["Exceeded my expectations", "Delivered significantly more than anticipated"],
+          ["Met my expectations", "Covered what was promised and intended"],
+          ["Partially met my expectations", "Met some requirements, fell short in others"],
+          ["Fell below my expectations", "Significantly missed key expectations"]
+        ]
+      },
+      {
+        id: "coordination", number: "Question 3", prompt: "How would you rate the overall organization and coordination of the programme?",
+        answers: [16, 8, 2, 0, 0],
+        options: [["Excellent", ""], ["Very good", ""], ["Good", ""], ["Fair", ""], ["Poor", ""]]
+      }
+    ];
+    const SCALE = [
       ["1", "Strongly disagree"], ["2", "Disagree"], ["3", "Neither agree nor disagree"],
       ["4", "Agree"], ["5", "Strongly agree"]
     ];
-    const delivery = [
-      ["5", "Concepts were explained clearly and in a way I could understand.", [0,1,0,15,10]],
-      ["6", "The practical exercises and assignments helped me apply what I learned.", [1,0,0,11,14]],
-      ["7", "I received adequate guidance and support when I encountered difficulties.", [2,0,0,12,12]],
-      ["8", "The feedback I received on my work helped me identify areas for improvement.", [0,1,0,13,12]],
-      ["9", "The programme’s structure, pace and schedule supported my learning.", [0,1,2,15,8]]
+    const DELIVERY = [
+      ["Question 5", "Concepts were explained clearly and in a way I could understand.", [0,1,0,15,10]],
+      ["Question 6", "The practical exercises and assignments helped me apply what I learned.", [1,0,0,11,14]],
+      ["Question 7", "I received adequate guidance and support when I encountered difficulties.", [2,0,0,12,12]],
+      ["Question 8", "The feedback I received on my work helped me identify areas for improvement.", [0,1,0,13,12]],
+      ["Question 9", "The programme’s structure, pace and schedule supported my learning.", [0,1,2,15,8]]
     ];
-    const habits = [
-      ["11", "I attended classes consistently and participated actively in learning activities.", [0,1,1,9,15]],
-      ["12", "I dedicated sufficient time outside class to practise, revise and complete assignments.", [1,0,5,12,8]],
-      ["13", "I took responsibility for resolving my learning difficulties by asking questions, researching or seeking help.", [1,0,3,13,9]],
-      ["14", "I collaborated effectively with my peers and contributed fairly to group activities and projects.", [1,0,1,10,14]]
+    const HABITS = [
+      ["Question 11", "I attended classes consistently and participated actively in learning activities.", [0,1,1,9,15]],
+      ["Question 12", "I dedicated sufficient time outside class to practise, revise and complete assignments.", [1,0,5,12,8]],
+      ["Question 13", "I took responsibility for resolving my learning difficulties by asking questions, researching or seeking help.", [1,0,3,13,9]],
+      ["Question 14", "I collaborated effectively with my peers and contributed fairly to group activities and projects.", [1,0,1,10,14]]
     ];
-    function renderRating(question) {
-      const [number, prompt, votes] = question;
-      const total = votes.reduce((sum, vote) => sum + vote, 0);
-      const mean = votes.reduce((sum, vote, index) => sum + vote * (index + 1), 0) / total;
-      const radius = 25;
-      const circumference = 2 * Math.PI * radius;
-      const dash = (mean / 5) * circumference;
-      const scaleVotes = ratingScale.map(([score, label], index) => `<span><b>${score}</b> ${label}: <b>${votes[index]}</b></span>`).join("");
-      return `<article class="rating"><svg class="ring" viewBox="0 0 60 60" role="img" aria-label="Average ${mean.toFixed(1)} out of 5 from ${total} responses"><circle class="ring-track" cx="30" cy="30" r="${radius}"/><circle class="ring-value" cx="30" cy="30" r="${radius}" stroke-dasharray="${dash} ${circumference}"/><text class="ring-text" x="30" y="31">${mean.toFixed(1)}</text></svg><div><div class="rating-title">${number}. ${prompt}</div><div class="rating-avg">Average ${mean.toFixed(1)} / 5 · ${total} votes</div><div class="rating-counts">${scaleVotes}</div></div></article>`;
-    }
-    document.getElementById("deliveryRatings").innerHTML = delivery.map(renderRating).join("");
-    document.getElementById("habitRatings").innerHTML = habits.map(renderRating).join("");
-    const skills = [
+    const SKILLS = [
       ["Excel for data analysis", "Formulas, pivot tables, data modeling & reporting", [0,0,0,8,18]],
       ["SQL for data querying and analysis", "Joins, aggregations, window functions & CTEs", [0,1,3,13,9]],
       ["Power BI for data modelling and visualisation", "Data modeling, DAX measures, interactive dashboards", [0,0,3,7,16]],
@@ -324,14 +419,244 @@
       ["Interpreting findings and communicating insights", "Executive storytelling, presentations & stakeholder comms", [0,0,2,9,15]],
       ["Working independently on practical data tasks", "Self-driven debugging, workflow execution & deliverables", [0,0,4,9,13]]
     ];
-    const skillLabels = ["Much lower", "Slightly lower", "About the same", "Slightly higher", "Much higher"];
-    const skillClasses = ["much-lower", "lower", "same", "slight", "much"];
-    document.getElementById("skillGrid").innerHTML = skills.map(([name, description, votes]) => {
-      const improved = votes[3] + votes[4];
-      const dots = votes.map((count, index) => Array.from({length: count}, () => `<i class="${skillClasses[index]}"></i>`).join("")).join("");
-      const chips = votes.map((count, index) => `<span><b>${count}</b> ${skillLabels[index]}</span>`).join("");
-      return `<article class="skill"><div class="skill-head"><strong>${name}</strong><b>${improved}/${responses} higher</b></div><div class="skill-desc">${description}</div><div class="dots" role="img" aria-label="${improved} of ${responses} reported higher ability">${dots}</div><div class="chips">${chips}</div></article>`;
-    }).join("");
+    const PREPARED = [
+      ["Very prepared", "Confident to tackle end-to-end industry briefs independently", 14],
+      ["Somewhat prepared", "Can handle tasks with standard documentation and mentorship", 9],
+      ["Neither prepared nor unprepared", "Neutral, requires structured environment", 0],
+      ["Slightly unprepared", "Feel hesitation on complex business projects", 3],
+      ["Not prepared at all", "Require comprehensive additional training", 0]
+    ];
+    const SUPPORT = [
+      ["SQL", 10, "tree-main"], ["Presenting and communicating findings", 6, "tree-present"],
+      ["Power BI", 4, "tree-bi"], ["Job readiness and professional development", 3, "tree-readiness"],
+      ["Analytical thinking and problem-solving", 1, "tree-thinking"],
+      ["Portfolio development and real-world projects", 1, "tree-portfolio"], ["Other", 1, "tree-other"],
+      ["Excel", 0, ""], ["Data visualisation and storytelling", 0, ""]
+    ];
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+    const pct = (value) => `${Math.round(value / TOTAL * 100)}%`;
+    const mean = (answers) => answers.reduce((sum, votes, score) => sum + votes * (score + 1), 0) / answers.reduce((sum, votes) => sum + votes, 0);
+
+    function header(index, title, subtitle, eyebrow) {
+      return `<div class="page-head"><div><div class="eyebrow">${eyebrow}</div><h2>${title}</h2><p class="lede">${subtitle}</p></div><div class="section-index">${String(index).padStart(2,"0")}</div></div>`;
+    }
+    function questionPanel(label, prompt, note = "") {
+      return `<div class="question-panel"><div class="question-label">${label}</div><p class="question-text">${prompt}</p>${note ? `<p class="question-note">${note}</p>` : ""}</div>`;
+    }
+    function metric(value, label, detail) {
+      return `<article class="metric"><div class="metric-label">${label}</div><strong class="metric-value">${value}</strong><div class="metric-detail">${detail}</div></article>`;
+    }
+    function donutCard(question) {
+      const { id, number, prompt, answers, options } = question;
+      const total = answers.reduce((sum, value) => sum + value, 0);
+      const radius = 43;
+      const circumference = 2 * Math.PI * radius;
+      const gap = 2.7;
+      let offset = 0;
+      const segments = answers.map((votes, index) => {
+        if (!votes) return "";
+        const length = votes / total * circumference;
+        const markup = `<circle class="donut-segment" tabindex="0" role="img" aria-label="${esc(options[index][0])}: ${votes} of ${total} votes, ${pct(votes)}" cx="73" cy="73" r="${radius}" stroke="${COLORS[index]}" stroke-dasharray="${Math.max(0,length-gap)} ${circumference-length+gap}" stroke-dashoffset="${-offset}"><title>${esc(options[index][0])}: ${votes}/${total} votes (${pct(votes)})</title></circle>`;
+        offset += length;
+        return markup;
+      }).join("");
+      const legend = options.map(([name, description], index) => `<div class="vote-item"><span class="swatch" style="background:${COLORS[index]}"></span><span><span class="vote-name">${esc(name)}</span>${description ? `<span class="vote-desc">${esc(description)}</span>` : ""}</span><span class="vote-count">${answers[index]}<small>${pct(answers[index])} · votes</small></span></div>`).join("");
+      return `<article class="question-card" id="${id}"><h3><small>${number} · ${total} responses</small>${esc(prompt)}</h3><div class="chart-row"><div class="donut-wrap"><svg class="donut" viewBox="0 0 146 146" aria-label="${esc(prompt)}"><circle class="donut-track" cx="73" cy="73" r="${radius}"/>${segments}<text class="donut-caption" x="73" y="65">VOTES</text><text class="donut-total" x="73" y="91">${total}</text><text class="donut-foot" x="73" y="106">of ${TOTAL} responses</text></svg></div><div class="vote-legend">${legend}</div></div><p class="card-foot">Segment size shows share of answers. Zero-vote options remain in the key for context.</p></article>`;
+    }
+    function ratingCard([number,prompt,answers]) {
+      const total=answers.reduce((sum,value)=>sum+value,0);
+      const average=mean(answers);
+      const radius=24, circumference=2*Math.PI*radius, dash=average/5*circumference;
+      const distribution=answers.map((count,index)=>`<span class="rating-chip"><strong>${index+1}</strong> ${SCALE[index][1]}: <strong>${count}</strong></span>`).join("");
+      return `<article class="rating-card"><svg class="rating-ring" viewBox="0 0 56 56" role="img" aria-label="Average ${average.toFixed(1)} out of 5 from ${total} votes"><circle class="donut-track" cx="28" cy="28" r="${radius}" stroke-width="4"/><circle class="rating-value" cx="28" cy="28" r="${radius}" stroke-dasharray="${dash} ${circumference}"/><text class="donut-total" x="28" y="32" style="font-size:13px">${average.toFixed(1)}</text></svg><div><div class="rating-title">${number}. ${esc(prompt)}</div><div class="rating-average">Average ${average.toFixed(2)} / 5 · ${total} votes</div><div class="rating-distribution">${distribution}</div></div></article>`;
+    }
+    function skillCard([name,detail,counts]) {
+      const total=counts.reduce((sum,count)=>sum+count,0);
+      const improved=counts[3]+counts[4];
+      const classes=["much-lower","lower","same","slight","much"];
+      const dots=counts.map((count,index)=>Array.from({length:count},()=>`<i class="${classes[index]}"></i>`).join("")).join("");
+      const chips=counts.map((count,index)=>`<span class="skill-chip"><strong>${count}</strong> ${["Much lower","Slightly lower","About the same","Slightly higher","Much higher"][index]}</span>`).join("");
+      return `<article class="skill-card"><div class="skill-head"><span class="skill-name">${esc(name)}</span><span class="skill-up">${improved}/${total} higher</span></div><div class="skill-detail">${esc(detail)}</div><div class="dot-field" role="img" aria-label="${improved} of ${total} learners reported higher ability">${dots}</div><div class="skill-legend">${chips}</div></article>`;
+    }
+    function optionRows(options) {
+      return `<div class="option-list">${options.map(([name,description,count])=>`<div class="option-row"><span><span class="option-name">${esc(name)}</span>${description?`<span class="option-desc">${esc(description)}</span>`:""}</span><span class="option-votes">${count}/${TOTAL}<small>votes · ${pct(count)}</small></span></div>`).join("")}</div>`;
+    }
+    function overviewPage() {
+      const q1Positive=19+5;
+      const higherPowerBI=16+7;
+      return `<section class="report-page active" id="overview" data-title="${PAGE_DEFS[0].label}">
+        <div class="cover"><div class="eyebrow">Student voice · End-of-programme feedback</div><div class="cover-copy"><h1>Learning that moves <span>people forward.</span></h1><p class="lede">A clearer read of the Data Analytics second cohort: how learners rated the programme, where they grew, and what they say would make the next cohort stronger.</p></div><div class="cover-foot"><div><strong>Shamzbridge · Cohort 2</strong>Feedback collected 27–30 October 2026<br>Based on ${TOTAL} submitted responses</div><div class="cover-stamp">Aggregate results · individual comments omitted</div></div></div>
+        <div class="metric-grid">${metric(TOTAL,"Feedback responses","Submitted end-of-programme forms")}${metric(`${q1Positive}/${TOTAL}`,"Excellent or Very good","Overall experience · 92%")}${metric("22/26","Exceeded expectations","Overall programme expectations · 85%")}${metric(`${higherPowerBI}/${TOTAL}`,"Reported higher Power BI ability","Self-assessed skill change · 88%")}</div>
+        <div class="insight-grid"><article class="insight"><div class="eyebrow">The cohort signal</div><h3>Strong experience. Clear next step.</h3><p>Ratings are positive, and students most often valued hands-on learning, projects, and the people around the programme. Their improvement feedback points toward protected practice time, steadier pacing, and additional technical and presentation support.</p><div class="kpi-row"><div class="kpi"><strong>10</strong>selected SQL support</div><div class="kpi"><strong>6</strong>selected presenting findings</div><div class="kpi"><strong>4.42 / 5</strong>practical exercises average</div></div></article><article class="insight dark"><div class="eyebrow">How to read</div><h3>Feedback, in context.</h3><p>Rating means are calculated from the original 1–5 answers, with every vote shown. Skill change and readiness are self-reported. Paragraph responses are summarised as cohort-wide themes; this public report does not publish student-level comments.</p></article></div>
+        <p class="source-note">Source: Shamzbridge Cohort 2 End-of-Programme Feedback. Question wording and rating scales follow the supplied live-form content.</p>
+      </section>`;
+    }
+    function experiencePage() {
+      return `<section class="report-page" id="experience" data-title="${PAGE_DEFS[1].label}">${header(2,"A positive experience across the cohort.","Doughnut slices show the share of votes; each legend shows the exact count and option wording from the form.","01 · Overall programme experience")}
+        <div class="question-panel"><div class="question-label">Section 1 · Overall programme experience</div><p class="question-text">These questions measure students’ overall satisfaction and how well the programme met their expectations.</p><p class="question-note">All three questions received 26 answers. Hover or focus a doughnut slice to highlight it.</p></div>
+        <div class="question-grid">${EXPERIENCE.map(donutCard).join("")}</div>
+        <div class="insight-grid" style="margin-top:13px"><article class="insight"><div class="eyebrow">Overall satisfaction</div><h3>24 of 26 gave an Excellent or Very good rating.</h3><p>Two rated the experience Good; no one selected Fair or Poor. Coordination followed a similar pattern, with two Good ratings.</p></article><article class="insight dark"><div class="eyebrow">Expectations</div><h3>All 26 met or exceeded expectations.</h3><p>22 said expectations were exceeded; 4 said they were met.</p></article></div>
+      </section>`;
+    }
+    function deliveryPage() {
+      return `<section class="report-page" id="delivery" data-title="${PAGE_DEFS[2].label}">${header(3,"Practical learning stands out.","Each ring is the average response out of five. Vote counts show how many learners selected each scale point.","02 · Programme team & training delivery")}
+        <div class="question-panel"><div class="question-label">Section 2 · Feedback on the programme team and training delivery</div><p class="question-text">This section evaluates the programme from the students’ perspective of the coaches, learning structure, support, and learning environment.</p></div>
+        <div class="scale-panel"><strong>Questions 5–9 · Rating scale (1 to 5)</strong><div class="scale-list">${SCALE.map(([score,label])=>`<span>${score} = ${label}</span>`).join("")}</div></div>
+        <div class="rating-grid">${DELIVERY.map(ratingCard).join("")}</div>
+        <div class="insight-grid" style="margin-top:13px"><article class="insight"><div class="eyebrow">Highest score</div><h3>Applying learning through practical exercises · 4.42 / 5</h3><p>14 learners strongly agreed and 11 agreed; 1 strongly disagreed.</p></article><article class="insight"><div class="eyebrow">Room to improve</div><h3>Structure, pace and schedule · 4.15 / 5</h3><p>This was the lowest average in the delivery group. 23 learners agreed or strongly agreed; three were neutral or disagreed.</p></article></div>
+      </section>`;
+    }
+    function habitsPage() {
+      return `<section class="report-page" id="habits" data-title="${PAGE_DEFS[3].label}">${header(4,"Learner commitment was strong. Time was tighter.","The average is the mean of 26 ratings. Each card shows the full 1–5 vote distribution that determined the score.","03 · Student self-assessment & commitment")}
+        <div class="question-panel"><div class="question-label">Section 3 · Student self-assessment and commitment</div><p class="question-text">This is the other side of the evaluation. Students reflect on their own actions, not only on what the programme provided.</p></div>
+        <div class="scale-panel"><strong>Questions 11–14 · Rating scale (1 to 5)</strong><div class="scale-list">${SCALE.map(([score,label])=>`<span>${score} = ${label}</span>`).join("")}</div></div>
+        <div class="rating-grid">${HABITS.map(ratingCard).join("")}</div>
+        <div class="insight-grid" style="margin-top:13px"><article class="insight"><div class="eyebrow">Strongest self-rating</div><h3>Attendance and participation · 4.46 / 5</h3><p>15 strongly agreed and 9 agreed that they attended consistently and participated actively.</p></article><article class="insight dark"><div class="eyebrow">Time to practise</div><h3>Outside-class time · 4.00 / 5 · 26 votes</h3><p>12 agreed, 8 strongly agreed, 5 were neutral, 1 strongly disagreed, and 0 disagreed. The average is the weighted mean of those 26 ratings.</p></article></div>
+      </section>`;
+    }
+    function skillsPage() {
+      return `<section class="report-page" id="skills" data-title="${PAGE_DEFS[4].label}">${header(5,"Learners report growth across all six skill areas.","One dot represents one learner. Colour and vote counts map to the options in the live form.","04 · Skills gained & readiness")}
+        <div class="question-panel"><div class="question-label">Question 16 · Multiple-choice grid</div><p class="question-text">How would you rate your current ability in each area compared with when you started the programme?</p><p class="question-note">Each dot represents one learner’s answer. The colors indicate the change they reported:</p><div class="skill-key"><span><i style="background:#bd6558"></i>Much lower</span><span><i style="background:#ffb39e"></i>Slightly lower</span><span><i style="background:#f5ca67"></i>About the same</span><span><i style="background:#ffc29e"></i>Slightly higher</span><span><i style="background:var(--green)"></i>Much higher</span></div></div>
+        <div class="skills">${SKILLS.map(skillCard).join("")}</div>
+        <div class="insight-grid" style="margin-top:13px"><article class="insight"><div class="eyebrow">Largest reported increases</div><h3>Excel 26/26 · Communication 24/26</h3><p>Every respondent reported higher Excel ability. 15 described their ability to interpret and communicate findings as much higher.</p></article><article class="insight dark"><div class="eyebrow">Interpret with care</div><h3>Perceived change, not a pre-test/post-test.</h3><p>Students compared their current skills with when they started. This reflects their own assessment, not an external skills evaluation.</p></article></div>
+      </section>`;
+    }
+    function readinessPage() {
+      const prepared=PREPARED.filter(([, , count],index)=>index<2).reduce((sum,entry)=>sum+entry[2],0);
+      return `<section class="report-page" id="readiness" data-title="${PAGE_DEFS[5].label}">${header(6,"Most learners feel ready to apply their skills.","The form distinguishes independent confidence from readiness with documentation or mentorship. All five choices are shown.","05 · Real-world readiness")}
+        <div class="question-panel"><div class="question-label">Question 17 · Multiple choice</div><p class="question-text">How prepared do you feel to use your data analytics skills to solve a real-world business problem independently?</p></div>
+        <div class="readiness-layout"><article class="readiness-stat"><div class="eyebrow">Very or somewhat prepared</div><div class="readiness-big">${prepared}/${TOTAL}</div><p>${pct(prepared)} feel at least somewhat prepared. This is a self-reported measure of confidence, not an external job-readiness assessment.</p></article><article class="question-card">${optionRows(PREPARED)}</article></div>
+        <div class="callout"><strong>Pair confidence with practice.</strong> Keep authentic business problems and project presentations, with supported practice to help learners deliver independently.</div>
+      </section>`;
+    }
+    function supportPage() {
+      const tiles=SUPPORT.filter(([,count])=>count>0).map(([name,count,cls])=>`<div class="tree-cell ${cls}" title="${esc(name)}: ${count} of ${TOTAL} votes"><strong>${count}/${TOTAL}</strong><span>${esc(name)}</span><small>${pct(count)} of responses</small></div>`).join("");
+      const zeros=SUPPORT.filter(([,count])=>count===0).map(([name])=>`<span class="zero-chip"><strong>${esc(name)}</strong> · 0 votes</span>`).join("");
+      return `<section class="report-page" id="support" data-title="${PAGE_DEFS[6].label}">${header(7,"SQL is the clearest support signal.","The mosaic brings each selected area together with its exact vote count and share of the cohort.","06 · Practice & support needs")}
+        <div class="question-panel"><div class="question-label">Question 18 · Single choice</div><p class="question-text">Which area do you still need the most support or practice in?</p><p class="question-note">One response per learner · 26 responses. Tile sizes are arranged for readability; exact vote counts and shares are shown in each tile.</p></div>
+        <article class="treemap-card"><h3>Support needs · all selected areas</h3><div class="treemap" role="list" aria-label="Support needs with vote counts and shares">${tiles}</div><p class="treemap-zero"><strong>No votes:</strong> ${zeros}</p><p class="card-foot">SQL and presenting or communicating findings account for 16 of 26 selections.</p></article>
+      </section>`;
+    }
+    const WRITTEN = [
+      {id:"q4", index:8, title:"What learners valued", eyebrow:"Question 4 · Most valuable aspect & why", prompt:"What was the most valuable aspect of the programme for you, and why?", sub:"26 written responses. The comments most often described practical learning, projects and supportive people.", themes:[
+        ["Practical work & real projects","Learners valued working through data tasks, applying tools and bringing learning into projects."],
+        ["Coaches & facilitators","Supportive, knowledgeable and patient teaching staff were repeatedly appreciated."],
+        ["Professional development & exposure","Guest leaders, mentorship, presentations and industry-facing activities broadened the experience."],
+        ["Skills brought together","Excel, SQL and Power BI helped students move from raw data toward useful insights."]
+      ]},
+      {id:"q10", index:9, title:"Suggestions for the programme team", eyebrow:"Question 10 · Optional paragraph", prompt:"What should the programme team improve in its teaching, support, communication, scheduling, or general coordination?", sub:"10 meaningful written responses; empty or placeholder-only replies are not counted.", themes:[
+        ["Space assignments out","Coordinate major coursework, presentations and deadlines so students can balance the workload."],
+        ["Add hands-on practice","Provide more time to practise new tools and apply lessons in real or realistic business cases."],
+        ["Make extra help accessible","Offer timely feedback, focused technical support and space to work through difficult topics."],
+        ["Protect class focus","Some responses requested fewer interruptions and clearer, more consistent communication."]
+      ]},
+      {id:"q15", index:10, title:"Learner reflections", eyebrow:"Question 15 · One thing done differently", prompt:"What is one thing you could have done differently to get more value from this programme?", sub:"25 meaningful written responses; empty or placeholder-only replies are not counted.", themes:[
+        ["Practise more often","Set aside regular time to revise lessons and repeat exercises after class."],
+        ["Ask questions sooner","Use live sessions and support opportunities to clarify difficult concepts."],
+        ["Take on personal projects","Build confidence by applying skills independently beyond assigned coursework."],
+        ["Be more intentional with time","Give the programme and its activities more consistent attention."]
+      ]},
+      {id:"q19", index:11, title:"Challenges faced", eyebrow:"Question 19 · Biggest challenge & impact", prompt:"What was the biggest challenge you faced during the programme, and how did it affect your learning?", sub:"26 written responses. Challenges reflect varied student circumstances; themes below are aggregated.", themes:[
+        ["Balancing competing demands","Work, family, travel and limited time made it harder to keep up with study and practice."],
+        ["Fast pace & technical concepts","Moving through tools and troubleshooting errors could leave less time to reinforce learning."],
+        ["Group coordination","Aligning schedules, sharing work and maintaining peer participation sometimes added friction."],
+        ["Access to equipment & learning conditions","Some comments raised computer performance, internet access or a suitable place to study."]
+      ]},
+      {id:"q20", index:12, title:"One change for the next cohort", eyebrow:"Question 20 · Programme recommendation", prompt:"If you could change one thing about the programme to make it more effective for future students, what would it be?", sub:"21 meaningful written responses; empty or placeholder-only replies are not counted.", themes:[
+        ["Allow more time to practise","Extend hands-on learning and independent practice before moving to the next tool."],
+        ["Manage pace and workload","Space coursework and presentations to make deadlines easier to balance."],
+        ["Offer a supported learning space","Provide more opportunities to practise, get help and work through technical barriers."],
+        ["Keep investing in guidance","Additional coaching and tool-specific support can help students build confidence."]
+      ]},
+      {id:"q21", index:13, title:"Strengths & areas to improve", eyebrow:"Question 21 · Programme strengths & improvement", prompt:"What would you say are the programme’s greatest strengths, and what are its most important areas for improvement?", sub:"25 meaningful written responses; empty or placeholder-only replies are not counted.", themes:[
+        ["Strength: committed people","Coaches, facilitators and mentors were frequently recognised as a programme strength."],
+        ["Strength: practical learning","Projects, peer learning, presentations and professional development added value."],
+        ["Improve: practice and pacing","Feedback returns to more time for technical practice and a manageable programme schedule."],
+        ["Improve: learning conditions","Some students identified the need for better access, resources or coordinated coursework."]
+      ]}
+    ];
+    function writtenPage(item) {
+      return `<section class="report-page" id="${item.id}" data-title="${item.title}">${header(item.index,item.title,item.sub,item.eyebrow)}${questionPanel(item.eyebrow,item.prompt,"Written feedback · Cohort-level themes only; individual responses are not published.")}<div class="theme-grid">${item.themes.map(([title,copy])=>`<article class="theme-card"><span class="theme-badge">Cohort theme</span><h3>${title}</h3><p>${copy}</p></article>`).join("")}</div><div class="source-note">Themes are concise summaries of submitted comments. They are not vote counts, and no student names or verbatim personal responses are included.</div></section>`;
+    }
+    function closingPage() {
+      return `<section class="report-page" id="closing" data-title="${PAGE_DEFS[13].label}"><div class="closing"><div><div class="eyebrow">The takeaway</div><h2>Keep what works. Give practice more room.</h2><p>Students rated the programme experience highly and reported skill gains. Preserve its practical, people-centred strengths while creating more supported time for technical practice, communicating findings and a manageable learning pace.</p><div class="kpi-row"><div class="kpi"><strong>24/26</strong>rated experience Excellent / Very good</div><div class="kpi"><strong>23/26</strong>reported increased Power BI ability</div><div class="kpi"><strong>10/26</strong>selected SQL support</div></div></div>      <div class="orbit" aria-hidden="true"><span><img src="images/shamzbridge%20icon.jpeg" alt=""></span></div></div><p class="source-note">Source: Shamzbridge Data Analytics Cohort 2 end-of-programme feedback. 26 responses. Paragraph input is presented only as aggregate themes in this public report.</p></section>`;
+    }
+    const pageMarkup=[
+      overviewPage(), experiencePage(), deliveryPage(), habitsPage(), skillsPage(), readinessPage(), supportPage(),
+      ...WRITTEN.map(writtenPage), closingPage()
+    ];
+    document.getElementById("pages").innerHTML=pageMarkup.join("");
+    const nav=document.getElementById("navigation");
+    nav.innerHTML=PAGE_DEFS.map((item,index)=>`<button class="nav-link" data-page="${item.id}" ${index===0?'aria-current="page"':""}><span class="nav-number">${String(index+1).padStart(2,"0")}</span><span>${item.short}</span></button>`).join("");
+    const pages=[...document.querySelectorAll(".report-page")];
+    let activeIndex=0;
+    function showPage(index,updateHash=true) {
+      activeIndex=Math.max(0,Math.min(index,pages.length-1));
+      pages.forEach((section,i)=>section.classList.toggle("active",i===activeIndex));
+      document.querySelectorAll(".nav-link").forEach((button,i)=>{
+        if(i===activeIndex) button.setAttribute("aria-current","page");
+        else button.removeAttribute("aria-current");
+      });
+      document.getElementById("currentTitle").textContent=PAGE_DEFS[activeIndex].label;
+      document.getElementById("pageCount").textContent=`${activeIndex+1} / ${pages.length}`;
+      document.getElementById("progressBar").style.width=`${(activeIndex+1)/pages.length*100}%`;
+      if(updateHash) history.replaceState(null,"",`#${PAGE_DEFS[activeIndex].id}`);
+      const sidebar=document.getElementById("sidebar");
+      const menuToggle=document.getElementById("menuToggle");
+      sidebar.classList.remove("open");
+      if(window.matchMedia("(max-width: 680px)").matches) {
+        menuToggle.setAttribute("aria-expanded","false");
+        menuToggle.setAttribute("aria-label","Open report navigation");
+        menuToggle.title="Open report navigation";
+      } else {
+        const expanded=!document.getElementById("app").classList.contains("sidebar-collapsed");
+        menuToggle.setAttribute("aria-expanded",String(expanded));
+        menuToggle.setAttribute("aria-label",expanded?"Collapse report navigation":"Expand report navigation");
+        menuToggle.title=expanded?"Collapse report navigation":"Expand report navigation";
+      }
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    nav.addEventListener("click",(event)=>{
+      const button=event.target.closest("[data-page]");
+      if(button) showPage(PAGE_DEFS.findIndex(page=>page.id===button.dataset.page));
+    });
+    pages.forEach((section,index)=>{
+      const controls=document.createElement("div");
+      controls.className="page-controls";
+      controls.innerHTML=`<button class="control" data-step="-1" ${index===0?"disabled":""}>← Previous</button><button class="control primary" data-step="1" ${index===pages.length-1?"disabled":""}>Next page →</button>`;
+      section.append(controls);
+      controls.addEventListener("click",(event)=>{
+        const button=event.target.closest("[data-step]");
+        if(button&&!button.disabled) showPage(activeIndex+Number(button.dataset.step));
+      });
+    });
+    document.getElementById("menuToggle").addEventListener("click",(event)=>{
+      const button=event.currentTarget;
+      const sidebar=document.getElementById("sidebar");
+      if(window.matchMedia("(max-width: 680px)").matches) {
+        const open=sidebar.classList.toggle("open");
+        button.setAttribute("aria-expanded",String(open));
+        button.setAttribute("aria-label",open?"Close report navigation":"Open report navigation");
+        button.title=open?"Close report navigation":"Open report navigation";
+      } else {
+        const collapsed=document.getElementById("app").classList.toggle("sidebar-collapsed");
+        button.setAttribute("aria-expanded",String(!collapsed));
+        button.setAttribute("aria-label",collapsed?"Expand report navigation":"Collapse report navigation");
+        button.title=collapsed?"Expand report navigation":"Collapse report navigation";
+      }
+    });
+    document.getElementById("printButton").addEventListener("click",()=>window.print());
+    document.addEventListener("keydown",(event)=>{
+      if(event.altKey||event.ctrlKey||event.metaKey||["INPUT","TEXTAREA"].includes(document.activeElement.tagName)) return;
+      if(event.key==="ArrowRight") showPage(activeIndex+1);
+      if(event.key==="ArrowLeft") showPage(activeIndex-1);
+    });
+    const initial=PAGE_DEFS.findIndex(item=>item.id===location.hash.slice(1));
+    document.getElementById("pageCount").textContent=`1 / ${pages.length}`;
+    document.getElementById("progressBar").style.width=`${100/pages.length}%`;
+    if(initial>0) showPage(initial,false);
   </script>
 </body>
 </html>
