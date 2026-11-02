@@ -21,6 +21,11 @@
       --blue: #a9d8e6;
       --gold: #f5ca67;
       --lavender: #d9d9f0;
+      --skill-much-lower: #6f2dbd;
+      --skill-lower: #c44536;
+      --skill-same: #d7a514;
+      --skill-slight: #2878b5;
+      --skill-much: #f36621;
       --shadow: 0 16px 40px rgba(20,59,53,.08);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
@@ -170,11 +175,11 @@
     .skill-detail { margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.45; }
     .dot-field { display: grid; grid-template-columns: repeat(13,7px); gap: 4px; margin: 10px 0 8px; }
     .dot-field i { width: 7px; height: 7px; border-radius: 50%; background: #e6e9e1; }
-    .dot-field i.much { background: var(--green); }
-    .dot-field i.slight { background: #ffc29e; }
-    .dot-field i.same { background: var(--gold); }
-    .dot-field i.lower { background: var(--coral); }
-    .dot-field i.much-lower { background: #bd6558; }
+    .dot-field i.much { background: var(--skill-much); }
+    .dot-field i.slight { background: var(--skill-slight); }
+    .dot-field i.same { background: var(--skill-same); }
+    .dot-field i.lower { background: var(--skill-lower); }
+    .dot-field i.much-lower { background: var(--skill-much-lower); }
     .skill-legend { display: flex; flex-wrap: wrap; gap: 4px; }
     .skill-chip { padding: 4px 5px; border-radius: 5px; color: var(--muted); background: #f1f3ed; font-size: 9px; }
     .skill-chip strong { color: var(--ink); }
@@ -518,7 +523,7 @@
     }
     function skillsPage() {
       return `<section class="report-page" id="skills" data-title="${PAGE_DEFS[4].label}">${header(5,"Learners report growth across all six skill areas.","One dot represents one learner. Colour and vote counts map to the options in the live form.","04 · Skills gained & readiness")}
-        <div class="question-panel"><div class="question-label">Question 16 · Multiple-choice grid</div><p class="question-text">How would you rate your current ability in each area compared with when you started the programme?</p><p class="question-note">Each dot represents one learner’s answer. The colors indicate the change they reported:</p><div class="skill-key"><span><i style="background:#bd6558"></i>Much lower</span><span><i style="background:#ffb39e"></i>Slightly lower</span><span><i style="background:#f5ca67"></i>About the same</span><span><i style="background:#ffc29e"></i>Slightly higher</span><span><i style="background:var(--green)"></i>Much higher</span></div></div>
+        <div class="question-panel"><div class="question-label">Question 16 · Multiple-choice grid</div><p class="question-text">How would you rate your current ability in each area compared with when you started the programme?</p><p class="question-note">Each dot represents one learner’s answer. The colors indicate the change they reported:</p><div class="skill-key"><span><i style="background:var(--skill-much-lower)"></i>Much lower</span><span><i style="background:var(--skill-lower)"></i>Slightly lower</span><span><i style="background:var(--skill-same)"></i>About the same</span><span><i style="background:var(--skill-slight)"></i>Slightly higher</span><span><i style="background:var(--skill-much)"></i>Much higher</span></div></div>
         <div class="skills">${SKILLS.map(skillCard).join("")}</div>
         <div class="insight-grid" style="margin-top:13px"><article class="insight"><div class="eyebrow">Largest reported increases</div><h3>Excel 26/26 · Communication 24/26</h3><p>Every respondent reported higher Excel ability. 15 described their ability to interpret and communicate findings as much higher.</p></article><article class="insight dark"><div class="eyebrow">Interpret with care</div><h3>Perceived change, not a pre-test/post-test.</h3><p>Students compared their current skills with when they started. This reflects their own assessment, not an external skills evaluation.</p></article></div>
       </section>`;
