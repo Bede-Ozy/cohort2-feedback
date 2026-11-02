@@ -204,12 +204,17 @@
     .tree-main { grid-column: 1 / span 5; grid-row: 1 / span 2; background: var(--green); color: white; }
     .tree-present { grid-column: 6 / span 4; grid-row: 1 / span 2; background: var(--blue); }
     .tree-bi { grid-column: 10 / span 3; grid-row: 1 / span 2; background: #a4d0bf; }
-    .tree-readiness { grid-column: 1 / -1; grid-row: 3; background: #f6d990; }
+    .tree-readiness { grid-column: 1 / -1; grid-row: 3; min-height: 140px; background: #f6d990; }
     .tree-thinking { grid-column: 1 / -1; grid-row: 4; background: #ffd1c2; }
     .tree-portfolio { grid-column: 1 / -1; grid-row: 5; background: var(--lavender); }
-    .tree-other { grid-column: 1 / -1; grid-row: 6; background: #efdfd6; }
+    .tree-other { display: grid; grid-template-columns: auto minmax(0,1fr) auto; grid-template-rows: auto auto; align-content: center; align-items: center; column-gap: 14px; row-gap: 4px; grid-column: 1 / -1; grid-row: 6; min-height: 110px; background: #efdfd6; }
+    .tree-other strong { grid-column: 1; grid-row: 1 / span 2; }
+    .tree-other > span:not(.tree-detail) { grid-column: 2; grid-row: 1; }
+    .tree-other .tree-detail { grid-column: 2; grid-row: 2; }
+    .tree-other small { grid-column: 3; grid-row: 1 / span 2; }
     .tree-main small { opacity: .86; }
-    .tree-thinking, .tree-portfolio, .tree-other { min-height: 88px; }
+    .tree-thinking, .tree-portfolio { min-height: 88px; }
+    .tree-detail { display: block; max-width: 100%; font-size: 13px !important; font-weight: 560 !important; line-height: 1.45 !important; }
     .zero-options { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .zero-chip { padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--white); font-size: 10px; }
     .zero-chip strong { color: var(--ink); }
@@ -297,7 +302,11 @@
       .tree-cell { grid-column: auto; grid-row: auto; }
       .tree-main, .tree-present { grid-column: span 2; min-height: 155px; }
       .tree-bi, .tree-readiness, .tree-thinking, .tree-portfolio, .tree-other { grid-column: span 2; }
-      .tree-thinking, .tree-portfolio, .tree-other { min-height: 100px; }
+      .tree-readiness { min-height: 136px; }
+      .tree-thinking, .tree-portfolio { min-height: 88px; }
+      .tree-other { grid-template-columns: auto minmax(0,1fr); grid-template-rows: auto auto auto; min-height: 124px; }
+      .tree-other strong { grid-row: 1 / span 2; }
+      .tree-other small { grid-column: 1 / -1; grid-row: 3; }
       .treemap-card { padding: 14px; }
     }
     @media (max-width: 390px) {
@@ -435,7 +444,8 @@
       ["SQL", 10, "tree-main"], ["Presenting and communicating findings", 6, "tree-present"],
       ["Power BI", 4, "tree-bi"], ["Job readiness and professional development", 3, "tree-readiness"],
       ["Analytical thinking and problem-solving", 1, "tree-thinking"],
-      ["Portfolio development and real-world projects", 1, "tree-portfolio"], ["Other", 1, "tree-other"],
+      ["Portfolio development and real-world projects", 1, "tree-portfolio"],
+      ["Other", 1, "tree-other", "Write-in also mentioned Excel, Power BI/DAX, job readiness, and portfolio development."],
       ["Excel", 0, ""], ["Data visualisation and storytelling", 0, ""]
     ];
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -537,7 +547,7 @@
       </section>`;
     }
     function supportPage() {
-      const tiles=SUPPORT.filter(([,count])=>count>0).map(([name,count,cls])=>`<div class="tree-cell ${cls}" title="${esc(name)}: ${count} of ${TOTAL} votes"><strong>${count}/${TOTAL}</strong><span>${esc(name)}</span><small>${pct(count)} of responses</small></div>`).join("");
+      const tiles=SUPPORT.filter(([,count])=>count>0).map(([name,count,cls,detail])=>`<div class="tree-cell ${cls}" title="${esc(name)}: ${count} of ${TOTAL} votes"><strong>${count}/${TOTAL}</strong><span>${esc(name)}</span>${detail?`<span class="tree-detail">${esc(detail)}</span>`:""}<small>${pct(count)} of responses</small></div>`).join("");
       const zeros=SUPPORT.filter(([,count])=>count===0).map(([name])=>`<span class="zero-chip"><strong>${esc(name)}</strong> · 0 votes</span>`).join("");
       return `<section class="report-page" id="support" data-title="${PAGE_DEFS[6].label}">${header(7,"SQL is the clearest support signal.","The mosaic brings each selected area together with its exact vote count and share of the cohort.","06 · Practice & support needs")}
         <div class="question-panel"><div class="question-label">Question 18 · Single choice</div><p class="question-text">Which area do you still need the most support or practice in?</p><p class="question-note">One response per learner · 26 responses. Tile sizes are arranged for readability; exact vote counts and shares are shown in each tile.</p></div>
